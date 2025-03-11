@@ -1,0 +1,39 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
+import ProfileView from '../views/ProfileView.vue'
+import HackathonsView from '../views/HackathonsView.vue'
+import ShopView from '../views/ShopView.vue'
+import RatingView from '../views/RatingView.vue'
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: HomeView,
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: ProfileView,
+    },
+    {
+      path: '/hackathons', 
+      name: 'hackathons',
+      component: HackathonsView,
+    },
+    {
+      path: '/shop',
+      name: 'shop',
+      component: ShopView,
+    },
+    {
+      path: '/rating',
+      name: 'rating',
+      component: RatingView,
+    },
+  ]
+})
+
+export default router
