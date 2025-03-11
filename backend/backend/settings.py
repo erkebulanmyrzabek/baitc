@@ -132,10 +132,8 @@ CORS_ALLOW_ALL_ORIGINS = True  # Только для разработки!
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",    # Vite dev server
-    "http://localhost:3000",    # Alternative development port
-    "http://127.0.0.1:5173",   # Alternative localhost
-    "https://e1ec-185-107-174-22.ngrok-free.app",
-    "https://1ccc-95-57-189-28.ngrok-free.app",
+    "https://hack.1ge.kz",
+    "https://testprojectvuetgminiapp.web.app",
 ]
 
 CORS_ALLOWED_METHODS = [
