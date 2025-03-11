@@ -2,6 +2,7 @@
 import Navbar from '../components/Navbar.vue'
 import { ref, onMounted } from 'vue'
 import { useMiniApp } from 'vue-tg'
+import { RouterLink } from 'vue-router'
 
 const MiniApp = useMiniApp()
 const username = ref('')
@@ -26,47 +27,59 @@ const error = ref({
 const CACHE_DURATION = 15 * 60 * 1000 // 15 минут в миллисекундах
 const CACHE_KEYS = {
     hackathons: 'cached_hackathons',
-    hackathonsTimestamp: 'cached_hackathons_timestamp'
+    hackathonsTimestamp: 'cached_hackathons_timestamp',
+    news: 'cached_news',
+    newsTimestamp: 'cached_news_timestamp',
+    webinars: 'cached_webinars',
+    webinarsTimestamp: 'cached_webinars_timestamp',
+    caseCups: 'cached_casecups',
+    caseCupsTimestamp: 'cached_casecups_timestamp'
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_URL = import.meta.env.VITE_API_URL 
 
 onMounted(async () => {
-    // Получаем данные пользователя из Telegram Mini App
     if (MiniApp.initDataUnsafe?.user?.username) {
         username.value = MiniApp.initDataUnsafe.user.username
     }
 
-    await fetchHackathons()
+    await Promise.all([
+        fetchHackathons(),
+        fetchNews(),
+        fetchWebinars(),
+        fetchCaseCups()
+    ])
 })
 
+// Общая функция для проверки кэша
 const isCacheValid = (timestampKey) => {
     const timestamp = localStorage.getItem(timestampKey)
     if (!timestamp) return false
     return Date.now() - parseInt(timestamp) < CACHE_DURATION
 }
 
-const fetchHackathons = async () => {
-    // Проверяем кэш
-    if (isCacheValid(CACHE_KEYS.hackathonsTimestamp)) {
-        const cachedData = localStorage.getItem(CACHE_KEYS.hackathons)
+// Общая функция для получения данных с API
+const fetchData = async (endpoint, cacheKey, timestampKey, loadingKey, errorKey, ref) => {
+    if (isCacheValid(timestampKey)) {
+        const cachedData = localStorage.getItem(cacheKey)
         if (cachedData) {
             try {
-                hackathons.value = JSON.parse(cachedData)
+                ref.value = JSON.parse(cachedData)
                 return
             } catch (e) {
-                console.error('Ошибка при чтении кэша:', e)
-                // Если ошибка при чтении кэша, продолжаем загрузку с сервера
+                console.error(`Ошибка при чтении кэша для ${endpoint}:`, e)
             }
         }
     }
 
-    loading.value.hackathons = true
-    error.value.hackathons = null
+    loading.value[loadingKey] = true
+    error.value[errorKey] = null
 
     try {
-        console.log('Fetching from:', `${API_URL}/api/hackathons/`)
-        const response = await fetch(`${API_URL}/api/hackathons/`, {
+        const apiUrl = `${API_URL}/api/${endpoint}`
+        console.log(`Fetching from: ${apiUrl}`)
+        
+        const response = await fetch(apiUrl, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -76,347 +89,458 @@ const fetchHackathons = async () => {
         })
         
         if (!response.ok) {
-            const errorText = await response.text()
-            console.error('API Error Response:', errorText)
             throw new Error(`HTTP error! status: ${response.status}`)
         }
         
-        const contentType = response.headers.get('content-type')
-        if (!contentType || !contentType.includes('application/json')) {
-            throw new Error('Received non-JSON response from server')
-        }
-
         const data = await response.json()
-        console.log('Received data:', data)
-        
-        // Проверяем, является ли data массивом
-        if (!Array.isArray(data)) {
-            throw new Error('API должен возвращать массив хакатонов')
-        }
-
-        // Сохраняем массив хакатонов
-        hackathons.value = data
+        ref.value = data
 
         // Сохраняем в кэш
-        localStorage.setItem(CACHE_KEYS.hackathons, JSON.stringify(data))
-        localStorage.setItem(CACHE_KEYS.hackathonsTimestamp, Date.now().toString())
+        localStorage.setItem(cacheKey, JSON.stringify(data))
+        localStorage.setItem(timestampKey, Date.now().toString())
     } catch (e) {
-        console.error('Ошибка при получении хакатонов:', e)
-        error.value.hackathons = `Не удалось загрузить список хакатонов: ${e.message}`
+        console.error(`Ошибка при получении ${endpoint}:`, e)
+        error.value[errorKey] = `Не удалось загрузить данные: ${e.message}`
     } finally {
-        loading.value.hackathons = false
+        loading.value[loadingKey] = false
     }
 }
 
-// Функция для обновления данных
-const refreshHackathons = async () => {
-    // Очищаем кэш
-    localStorage.removeItem(CACHE_KEYS.hackathons)
-    localStorage.removeItem(CACHE_KEYS.hackathonsTimestamp)
-    await fetchHackathons()
+const fetchHackathons = () => fetchData(
+    'hackathons/', 
+    CACHE_KEYS.hackathons,
+    CACHE_KEYS.hackathonsTimestamp,
+    'hackathons',
+    'hackathons',
+    hackathons
+)
+
+const fetchNews = () => fetchData(
+    'news/',
+    CACHE_KEYS.news,
+    CACHE_KEYS.newsTimestamp,
+    'news',
+    'news',
+    news
+)
+
+const fetchWebinars = () => fetchData(
+    'webinars/',
+    CACHE_KEYS.webinars,
+    CACHE_KEYS.webinarsTimestamp,
+    'webinars',
+    'webinars',
+    webinars
+)
+
+const fetchCaseCups = () => fetchData(
+    'case-cups/',
+    CACHE_KEYS.caseCups,
+    CACHE_KEYS.caseCupsTimestamp,
+    'caseCups',
+    'caseCups',
+    caseCups
+)
+
+// Функции обновления данных
+const refreshData = async (fetchFunction, cacheKey, timestampKey) => {
+    localStorage.removeItem(cacheKey)
+    localStorage.removeItem(timestampKey)
+    await fetchFunction()
 }
 
-// Заглушки для будущих API функций
-const fetchNews = async () => {
-    try {
-        // const response = await fetch('API_URL/news')
-        // news.value = await response.json()
-    } catch (error) {
-        console.error('Error fetching news:', error)
-    }
-}
+const refreshHackathons = () => refreshData(
+    fetchHackathons,
+    CACHE_KEYS.hackathons,
+    CACHE_KEYS.hackathonsTimestamp
+)
+
+const refreshNews = () => refreshData(
+    fetchNews,
+    CACHE_KEYS.news,
+    CACHE_KEYS.newsTimestamp
+)
+
+const refreshWebinars = () => refreshData(
+    fetchWebinars,
+    CACHE_KEYS.webinars,
+    CACHE_KEYS.webinarsTimestamp
+)
+
+const refreshCaseCups = () => refreshData(
+    fetchCaseCups,
+    CACHE_KEYS.caseCups,
+    CACHE_KEYS.caseCupsTimestamp
+)
+
 </script>
 
 <template>
-    <main>
-        <div class="home-view">
-            <div class="user-info">
-                <h2 class="username">@{{ username }}</h2>
+  <div class="home">
+    <section class="hero-section">
+      <div class="hero-content">
+        <h1>Добро пожаловать в мир хакатонов</h1>
+        <p>Участвуйте в соревнованиях, развивайте навыки и побеждайте вместе с нами</p>
+        <RouterLink to="/hackathons" class="cta-button">Найти хакатон</RouterLink>
+      </div>
+    </section>
+
+    <section class="upcoming-section">
+      <div class="section-header">
+        <h2>Ближайшие хакатоны</h2>
+        <RouterLink to="/hackathons" class="see-all">Смотреть все</RouterLink>
+      </div>
+      <div class="hackathons-grid">
+        <div v-for="hackathon in hackathons" :key="hackathon.id" class="hackathon-card">
+          <div class="hackathon-image">
+            <img :src="hackathon.image" :alt="hackathon.name">
+            <span class="hackathon-date">{{ hackathon.start_date }}</span>
+          </div>
+          <div class="hackathon-content">
+            <h3>{{ hackathon.name }}</h3>
+            <p>{{ hackathon.description }}</p>
+            <div class="hackathon-footer">
+              <div class="tags">
+                <span v-for="tag in hackathon.tags" :key="tag" class="tag">{{ tag }}</span>
+              </div>
+              <button class="join-button">Участвовать</button>
             </div>
-            
-            <div class="content-section">
-                <div class="section news">
-                    <h2>Последние новости</h2>
-                    <div class="cards-container">
-                        <!-- Здесь будут карточки новостей -->
-                        <div class="placeholder-card">
-                            <div class="placeholder-image"></div>
-                            <div class="placeholder-text"></div>
-                        </div>
-                        <div class="placeholder-card">
-                            <div class="placeholder-image"></div>
-                            <div class="placeholder-text"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section hackathons">
-                    <div class="section-header">
-                        <h2>Хакатоны</h2>
-                        <button @click="refreshHackathons" class="refresh-button">
-                            Обновить
-                        </button>
-                    </div>
-                    
-                    <div v-if="loading.hackathons" class="loading">
-                        Загрузка...
-                    </div>
-                    
-                    <div v-else-if="error.hackathons" class="error">
-                        {{ error.hackathons }}
-                        <button @click="fetchHackathons" class="retry-button">
-                            Попробовать снова
-                        </button>
-                    </div>
-                    
-                    <div v-else class="cards-container">
-                        <div v-for="hackathon in hackathons" 
-                             :key="hackathon.id" 
-                             class="hackathon-card">
-                            <h3>{{ hackathon.name }}</h3>
-                            <p>{{ hackathon.description }}</p>
-                            <div class="dates">
-                                <span>{{ new Date(hackathon.start_date).toLocaleDateString() }}</span>
-                                -
-                                <span>{{ new Date(hackathon.end_date).toLocaleDateString() }}</span>
-                            </div>
-                        </div>
-                        
-                        <div v-if="hackathons.length === 0" class="empty-state">
-                            Нет активных хакатонов
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section webinars">
-                    <h2>Вебинары</h2>
-                    <div class="cards-container">
-                        <!-- Здесь будут карточки вебинаров -->
-                        <div class="placeholder-card">
-                            <div class="placeholder-image"></div>
-                            <div class="placeholder-text"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section case-cups">
-                    <h2>Кейс-капы</h2>
-                    <div class="cards-container">
-                        <!-- Здесь будут карточки кейс-капов -->
-                        <div class="placeholder-card">
-                            <div class="placeholder-image"></div>
-                            <div class="placeholder-text"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-    </main>
+      </div>
+    </section>
+
+    <section class="leaderboard-section">
+      <div class="section-header">
+        <h2>Топ участников</h2>
+        <RouterLink to="/rating" class="see-all">Полный рейтинг</RouterLink>
+      </div>
+      <div class="leaderboard-grid">
+        <div v-for="user in topUsers" :key="user.id" class="user-card">
+          <div class="user-rank">#{{ user.rank }}</div>
+          <img :src="user.avatar" :alt="user.name" class="user-avatar">
+          <div class="user-info">
+            <h3>{{ user.name }}</h3>
+            <p>{{ user.points }} очков</p>
+          </div>
+          <div class="user-achievements">
+            <img v-for="achievement in user.achievements.slice(0, 3)" 
+                 :key="achievement.id" 
+                 :src="achievement.icon" 
+                 :alt="achievement.name"
+                 :title="achievement.name">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="shop-preview-section">
+      <div class="section-header">
+        <h2>Магазин</h2>
+        <RouterLink to="/shop" class="see-all">Перейти в магазин</RouterLink>
+      </div>
+      <div class="items-grid">
+        <div v-for="item in featuredItems" :key="item.id" class="shop-item">
+          <div class="item-image">
+            <img :src="item.image" :alt="item.name">
+          </div>
+          <div class="item-content">
+            <h3>{{ item.name }}</h3>
+            <p class="item-price">{{ item.price }} очков</p>
+            <button class="buy-button">Купить</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 </template>
 
 <style scoped>
-.home-view {
-    padding: 20px;
-    padding-bottom: 100px; /* Для навбара */
-    max-width: 100vw;
-    box-sizing: border-box;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
+.home {
+  padding-bottom: 80px;
 }
 
-.user-info {
-    margin-bottom: 24px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    padding: 10px 0;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%);
+.hero-section {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  padding: 80px 20px;
+  text-align: center;
+  margin-bottom: 40px;
 }
 
-.username {
-    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: clamp(18px, 5vw, 24px);
-    font-weight: 700;
-    color: #1a1a1a;
-    margin: 0;
-    padding: 8px 16px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 16px;
-    display: inline-block;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 90%;
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.content-section {
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-    width: 100%;
-    max-width: 100%;
+.hero-content h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
 }
 
-.section {
-    background: rgba(255,255,255,0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 24px;
-    padding: 24px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.05);
-    width: 100%;
-    box-sizing: border-box;
+.hero-content p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin-bottom: 30px;
 }
 
-.section h2 {
-    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: clamp(16px, 4vw, 20px);
-    font-weight: 600;
-    margin: 0 0 16px 0;
-    color: #1a1a1a;
+.cta-button {
+  display: inline-block;
+  background: white;
+  color: #6366f1;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
 }
 
-.cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-    width: 100%;
-}
-
-.placeholder-card {
-    background: rgba(255,255,255,0.5);
-    border-radius: 16px;
-    padding: 16px;
-    height: 200px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.placeholder-image {
-    width: 100%;
-    height: 120px;
-    background: rgba(0,0,0,0.05);
-    border-radius: 12px;
-}
-
-.placeholder-text {
-    width: 70%;
-    height: 20px;
-    background: rgba(0,0,0,0.05);
-    border-radius: 6px;
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 20px;
 }
 
-.refresh-button, .retry-button {
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: none;
-    background: rgba(255, 255, 255, 0.8);
-    color: #1a1a1a;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.section-header h2 {
+  font-size: 1.5rem;
+  color: #1f2937;
 }
 
-.refresh-button:hover, .retry-button:hover {
-    background: rgba(255, 255, 255, 0.9);
-    transform: translateY(-1px);
+.see-all {
+  color: #6366f1;
+  text-decoration: none;
+  font-weight: 500;
 }
 
-.loading {
-    text-align: center;
-    padding: 20px;
-    color: #666;
-}
-
-.error {
-    text-align: center;
-    padding: 20px;
-    color: #ff4444;
+.hackathons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 0 20px;
 }
 
 .hackathon-card {
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 16px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
 }
 
-.hackathon-card h3 {
-    margin: 0;
-    font-size: 18px;
-    color: #1a1a1a;
+.hackathon-card:hover {
+  transform: translateY(-2px);
 }
 
-.hackathon-card p {
-    margin: 0;
-    color: #666;
-    font-size: 14px;
+.hackathon-image {
+  position: relative;
+  height: 160px;
 }
 
-.dates {
-    font-size: 14px;
-    color: #888;
+.hackathon-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.empty-state {
-    text-align: center;
-    padding: 40px;
-    color: #666;
-    font-style: italic;
+.hackathon-date {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
 }
 
-@media screen and (max-width: 600px) {
-    .home-view {
-        padding: 12px;
-        padding-bottom: 80px;
-    }
-
-    .section {
-        padding: 16px;
-        border-radius: 20px;
-    }
-
-    .cards-container {
-        grid-template-columns: 1fr;
-    }
-
-    .username {
-        font-size: 18px;
-        padding: 6px 12px;
-    }
-
-    .hackathon-card {
-        padding: 16px;
-    }
+.hackathon-content {
+  padding: 20px;
 }
 
-@media screen and (max-width: 360px) {
-    .home-view {
-        padding: 8px;
-        padding-bottom: 70px;
-    }
+.hackathon-content h3 {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+  color: #1f2937;
+}
 
-    .section {
-        padding: 12px;
-        border-radius: 16px;
-    }
+.hackathon-content p {
+  color: #6b7280;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
 
-    .username {
-        font-size: 16px;
-        padding: 4px 10px;
-    }
+.hackathon-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tags {
+  display: flex;
+  gap: 8px;
+}
+
+.tag {
+  background: #f3f4f6;
+  color: #4b5563;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.join-button {
+  background: #6366f1;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.join-button:hover {
+  background: #4f46e5;
+}
+
+.leaderboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 0 20px;
+}
+
+.user-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.user-rank {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #6366f1;
+}
+
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-info h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+.user-info p {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.user-achievements {
+  display: flex;
+  gap: 4px;
+}
+
+.user-achievements img {
+  width: 24px;
+  height: 24px;
+}
+
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 0 20px;
+}
+
+.shop-item {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.item-image {
+  height: 160px;
+}
+
+.item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-content {
+  padding: 15px;
+  text-align: center;
+}
+
+.item-content h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+.item-price {
+  color: #6366f1;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.buy-button {
+  background: #6366f1;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  width: 100%;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.buy-button:hover {
+  background: #4f46e5;
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 60px 20px;
+  }
+
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .hero-content p {
+    font-size: 1rem;
+  }
+
+  .hackathons-grid,
+  .leaderboard-grid,
+  .items-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -4,7 +4,7 @@ import ProfileView from '../views/ProfileView.vue'
 import HackathonsView from '../views/HackathonsView.vue'
 import ShopView from '../views/ShopView.vue'
 import RatingView from '../views/RatingView.vue'
-
+import HackathonDetailView from '../views/HackathonDetailView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -32,6 +32,11 @@ const router = createRouter({
       path: '/rating',
       name: 'rating',
       component: RatingView,
+    },
+    {
+      path: '/hackathon/:id',
+      name: 'hackathon-detail',
+      component: HackathonDetailView,
     },
   ]
 })
