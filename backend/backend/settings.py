@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'hackathon',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -131,11 +132,10 @@ CORS_ALLOW_ALL_ORIGINS = True  # Только для разработки!
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",    # Vite dev server
-    "http://localhost:4173",    # Vite preview
     "http://localhost:3000",    # Alternative development port
     "http://127.0.0.1:5173",   # Alternative localhost
-    "http://127.0.0.1:4173",
     "https://e1ec-185-107-174-22.ngrok-free.app",
+    "https://1ccc-95-57-189-28.ngrok-free.app",
 ]
 
 CORS_ALLOWED_METHODS = [
