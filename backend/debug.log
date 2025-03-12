@@ -385,3 +385,8 @@ WARNING 2025-03-12 16:33:47,418 log 77613 6123237376 Not Found: /api/users
 WARNING 2025-03-12 16:33:53,306 log 77613 6123237376 Not Found: /api/users/
 WARNING 2025-03-12 16:34:01,617 log 77613 6123237376 Forbidden: /api/users/auth/telegram/
 WARNING 2025-03-12 16:34:13,905 log 77613 6123237376 Forbidden: /api/users/users/profile/
+INFO 2025-03-12 16:37:32,540 autoreload 78804 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 18:19:28,006 autoreload 89661 8346241088 Watching for file changes with StatReloader
+WARNING 2025-03-12 18:19:30,212 log 89661 6170701824 Not Found: /
+WARNING 2025-03-12 18:19:36,600 log 89661 6170701824 Not Found: /api/users/
+WARNING 2025-03-12 18:19:47,278 log 89661 6170701824 Forbidden: /api/users/users/profile/

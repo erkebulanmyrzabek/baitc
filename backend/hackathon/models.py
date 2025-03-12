@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User
+from users.models import UserProfile
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -17,7 +17,7 @@ class Hackathon(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     registration_deadline = models.DateTimeField()
-    participants = models.ManyToManyField(User, related_name='hackathons', blank=True)
+    participants = models.ManyToManyField(UserProfile, related_name='hackathons', blank=True)
     max_participants = models.PositiveIntegerField(default=100)
     prize_pool = models.CharField(max_length=100)
     location = models.CharField(max_length=200)

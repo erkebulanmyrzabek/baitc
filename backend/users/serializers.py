@@ -1,10 +1,11 @@
 from rest_framework import serializers
-from .models import User
+from .models import UserProfile
+import json
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = UserProfile
         fields = '__all__'
 
 class TelegramAuthSerializer(serializers.Serializer):
@@ -15,14 +16,29 @@ class TelegramAuthSerializer(serializers.Serializer):
     photo_url = serializers.URLField(required=False, allow_null=True)
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    tech_stack = serializers.ListField(child=serializers.CharField(), required=False)
+
     class Meta:
-        model = User
+        model = UserProfile
         fields = [
-            'id', 'username', 'first_name', 'last_name', 'email',
-            'telegram_id', 'photo_url', 'phone', 'city', 'age',
-            'gender', 'tech_stack', 'language', 'theme'
+            'id', 'telegram_id', 'username', 'first_name', 'last_name',
+            'photo_url', 'phone', 'city', 'age', 'gender',
+            'tech_stack', 'language', 'theme', 'xp', 'level'
         ]
-        read_only_fields = ['id', 'telegram_id']
+        read_only_fields = ['id', 'telegram_id', 'xp', 'level']
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['tech_stack'] = instance.get_tech_stack()
+        return ret
+
+    def to_internal_value(self, data):
+        if 'tech_stack' in data:
+            tech_stack = data.pop('tech_stack')
+            internal_data = super().to_internal_value(data)
+            internal_data['tech_stack'] = json.dumps(tech_stack)
+            return internal_data
+        return super().to_internal_value(data)
 
     def validate_age(self, value):
         if value and (value < 0 or value > 120):

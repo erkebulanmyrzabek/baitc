@@ -1,8 +1,8 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
+import json
 from django.conf import settings
 
-class User(models.Model):
+class UserProfile(models.Model):
     telegram_id = models.CharField(max_length=255, unique=True)
     username = models.CharField(max_length=150, unique=True)
     first_name = models.CharField(max_length=150, blank=True)
@@ -21,11 +21,7 @@ class User(models.Model):
         blank=True,
         null=True
     )
-    tech_stack = ArrayField(
-        models.CharField(max_length=50),
-        blank=True,
-        default=list
-    )
+    tech_stack = models.TextField(blank=True, default='[]')  # Будет хранить JSON
     language = models.CharField(
         max_length=5,
         choices=[
@@ -50,6 +46,17 @@ class User(models.Model):
     def __str__(self):
         return f"{self.username} ({self.telegram_id})"
     
+    def get_tech_stack(self):
+        """Получить список технологий"""
+        try:
+            return json.loads(self.tech_stack)
+        except:
+            return []
+    
+    def set_tech_stack(self, tech_list):
+        """Установить список технологий"""
+        self.tech_stack = json.dumps(tech_list)
+    
     def add_xp(self, amount):
         """Добавляет опыт пользователю и обновляет уровень"""
         self.xp += amount
@@ -67,3 +74,8 @@ class User(models.Model):
         """Повышает уровень пользователя"""
         self.level += 1
         self.save()
+
+    class Meta:
+        db_table = 'users'
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
