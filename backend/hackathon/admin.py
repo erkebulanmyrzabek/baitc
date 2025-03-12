@@ -1,7 +1,5 @@
 from django.contrib import admin
-from .models import Hackathon, News, Webinar, CaseCup
-# Register your models here.
+from .models import Hackathon, Tag
+
 admin.site.register(Hackathon)
-admin.site.register(News)
-admin.site.register(Webinar)
-admin.site.register(CaseCup)
+admin.site.register(Tag)

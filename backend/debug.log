@@ -1,0 +1,351 @@
+INFO 2025-03-12 11:33:55,236 autoreload 38283 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 11:33:57,374 autoreload 38283 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/backend/settings.py changed, reloading.
+INFO 2025-03-12 11:33:57,572 autoreload 38299 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 11:34:13,032 views 38299 6158004224 Attempting to fetch hackathons list
+INFO 2025-03-12 11:34:13,032 views 38299 6158004224 Attempting to fetch hackathons list
+INFO 2025-03-12 11:34:13,033 views 38299 6158004224 Cache miss for hackathons_list, querying database
+INFO 2025-03-12 11:34:13,033 views 38299 6158004224 Cache miss for hackathons_list, querying database
+ERROR 2025-03-12 11:34:13,038 views 38299 6158004224 Error fetching hackathons list: Field name `description` is not valid for model `Hackathon` in `hackathon.serializers.HackathonSerializer`.
+Traceback (most recent call last):
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/hackathon/views.py", line 53, in list
+    logger.info(f"Successfully fetched {len(serializer.data)} hackathons")
+                                            ^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 795, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 249, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 713, in to_representation
+    return [
+           ^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 714, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 523, in to_representation
+    for field in fields:
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 384, in _readable_fields
+    for field in self.fields.values():
+                 ^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 372, in fields
+    for key, value in self.get_fields().items():
+                      ^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1103, in get_fields
+    field_class, field_kwargs = self.build_field(
+                                ^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1249, in build_field
+    return self.build_unknown_field(field_name, model_class)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1367, in build_unknown_field
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: Field name `description` is not valid for model `Hackathon` in `hackathon.serializers.HackathonSerializer`.
+ERROR 2025-03-12 11:34:13,038 views 38299 6158004224 Error fetching hackathons list: Field name `description` is not valid for model `Hackathon` in `hackathon.serializers.HackathonSerializer`.
+Traceback (most recent call last):
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/hackathon/views.py", line 53, in list
+    logger.info(f"Successfully fetched {len(serializer.data)} hackathons")
+                                            ^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 795, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 249, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 713, in to_representation
+    return [
+           ^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 714, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 523, in to_representation
+    for field in fields:
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 384, in _readable_fields
+    for field in self.fields.values():
+                 ^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 372, in fields
+    for key, value in self.get_fields().items():
+                      ^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1103, in get_fields
+    field_class, field_kwargs = self.build_field(
+                                ^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1249, in build_field
+    return self.build_unknown_field(field_name, model_class)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1367, in build_unknown_field
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: Field name `description` is not valid for model `Hackathon` in `hackathon.serializers.HackathonSerializer`.
+ERROR 2025-03-12 11:34:13,062 log 38299 6158004224 Internal Server Error: /api/hackathons/
+Traceback (most recent call last):
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/hackathon/views.py", line 53, in list
+    logger.info(f"Successfully fetched {len(serializer.data)} hackathons")
+                                            ^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 795, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 249, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 713, in to_representation
+    return [
+           ^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 714, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 523, in to_representation
+    for field in fields:
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 384, in _readable_fields
+    for field in self.fields.values():
+                 ^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 372, in fields
+    for key, value in self.get_fields().items():
+                      ^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1103, in get_fields
+    field_class, field_kwargs = self.build_field(
+                                ^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1249, in build_field
+    return self.build_unknown_field(field_name, model_class)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1367, in build_unknown_field
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: Field name `description` is not valid for model `Hackathon` in `hackathon.serializers.HackathonSerializer`.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/hackathon/views.py", line 61, in list
+    "detail": str(e) if settings.DEBUG else "Внутренняя ошибка сервера"
+                        ^^^^^^^^
+NameError: name 'settings' is not defined
+INFO 2025-03-12 11:34:38,413 autoreload 38299 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/hackathon/views.py changed, reloading.
+INFO 2025-03-12 11:34:38,800 autoreload 38499 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 11:34:39,938 autoreload 38499 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/backend/settings.py changed, reloading.
+INFO 2025-03-12 11:34:40,255 autoreload 38503 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 11:34:40,485 views 38503 6131642368 Attempting to fetch hackathons list
+INFO 2025-03-12 11:34:40,485 views 38503 6131642368 Attempting to fetch hackathons list
+INFO 2025-03-12 11:34:40,485 views 38503 6131642368 Cache miss for hackathons_list, querying database
+INFO 2025-03-12 11:34:40,485 views 38503 6131642368 Cache miss for hackathons_list, querying database
+ERROR 2025-03-12 11:34:40,490 views 38503 6131642368 Error fetching hackathons list: Field name `description` is not valid for model `Hackathon` in `hackathon.serializers.HackathonSerializer`.
+Traceback (most recent call last):
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/hackathon/views.py", line 55, in list
+    logger.info(f"Successfully fetched {len(serializer.data)} hackathons")
+                                            ^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 795, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 249, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 713, in to_representation
+    return [
+           ^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 714, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 523, in to_representation
+    for field in fields:
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 384, in _readable_fields
+    for field in self.fields.values():
+                 ^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 372, in fields
+    for key, value in self.get_fields().items():
+                      ^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1103, in get_fields
+    field_class, field_kwargs = self.build_field(
+                                ^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1249, in build_field
+    return self.build_unknown_field(field_name, model_class)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1367, in build_unknown_field
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: Field name `description` is not valid for model `Hackathon` in `hackathon.serializers.HackathonSerializer`.
+ERROR 2025-03-12 11:34:40,490 views 38503 6131642368 Error fetching hackathons list: Field name `description` is not valid for model `Hackathon` in `hackathon.serializers.HackathonSerializer`.
+Traceback (most recent call last):
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/hackathon/views.py", line 55, in list
+    logger.info(f"Successfully fetched {len(serializer.data)} hackathons")
+                                            ^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 795, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 249, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 713, in to_representation
+    return [
+           ^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 714, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 523, in to_representation
+    for field in fields:
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 384, in _readable_fields
+    for field in self.fields.values():
+                 ^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 372, in fields
+    for key, value in self.get_fields().items():
+                      ^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1103, in get_fields
+    field_class, field_kwargs = self.build_field(
+                                ^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1249, in build_field
+    return self.build_unknown_field(field_name, model_class)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1367, in build_unknown_field
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: Field name `description` is not valid for model `Hackathon` in `hackathon.serializers.HackathonSerializer`.
+ERROR 2025-03-12 11:34:40,511 log 38503 6131642368 Internal Server Error: /api/hackathons/
+Traceback (most recent call last):
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/response.py", line 74, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/renderers.py", line 727, in render
+    context = self.get_context(data, accepted_media_type, renderer_context)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/renderers.py", line 658, in get_context
+    raw_data_post_form = self.get_raw_data_form(data, view, 'POST', request)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/renderers.py", line 565, in get_raw_data_form
+    data = serializer.data.copy()
+           ^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 571, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 253, in data
+    self._data = self.get_initial()
+                 ^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 421, in get_initial
+    for field in self.fields.values()
+                 ^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 372, in fields
+    for key, value in self.get_fields().items():
+                      ^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1103, in get_fields
+    field_class, field_kwargs = self.build_field(
+                                ^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1249, in build_field
+    return self.build_unknown_field(field_name, model_class)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/rest_framework/serializers.py", line 1367, in build_unknown_field
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: Field name `description` is not valid for model `Hackathon` in `hackathon.serializers.HackathonSerializer`.
+INFO 2025-03-12 11:35:00,770 autoreload 38503 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/backend/urls.py changed, reloading.
+INFO 2025-03-12 11:35:01,062 autoreload 38589 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 11:35:06,308 autoreload 38589 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/hackathon/serializers.py changed, reloading.
+INFO 2025-03-12 11:35:06,492 autoreload 38620 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 11:35:08,767 views 38620 6159888384 Attempting to fetch hackathons list
+INFO 2025-03-12 11:35:08,767 views 38620 6159888384 Attempting to fetch hackathons list
+INFO 2025-03-12 11:35:08,768 views 38620 6159888384 Cache miss for hackathons_list, querying database
+INFO 2025-03-12 11:35:08,768 views 38620 6159888384 Cache miss for hackathons_list, querying database
+INFO 2025-03-12 11:35:08,775 views 38620 6159888384 Successfully fetched 1 hackathons
+INFO 2025-03-12 11:35:08,775 views 38620 6159888384 Successfully fetched 1 hackathons
+INFO 2025-03-12 11:35:36,328 autoreload 38620 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/backend/settings.py changed, reloading.
+INFO 2025-03-12 11:35:36,623 autoreload 38754 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 11:35:39,819 autoreload 38754 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/hackathon/views.py changed, reloading.
+INFO 2025-03-12 11:35:40,010 autoreload 38769 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 11:35:45,257 views 38769 6166851584 Attempting to fetch hackathons list
+INFO 2025-03-12 11:35:45,257 views 38769 6166851584 Attempting to fetch hackathons list
+INFO 2025-03-12 11:35:45,257 views 38769 6166851584 Cache miss for hackathon queryset
+INFO 2025-03-12 11:35:45,257 views 38769 6166851584 Cache miss for hackathon queryset
+INFO 2025-03-12 11:35:45,261 views 38769 6166851584 Successfully retrieved 1 hackathons
+INFO 2025-03-12 11:35:45,261 views 38769 6166851584 Successfully retrieved 1 hackathons
+INFO 2025-03-12 11:35:45,743 views 38769 6166851584 Attempting to fetch hackathons list
+INFO 2025-03-12 11:35:45,743 views 38769 6166851584 Attempting to fetch hackathons list
+INFO 2025-03-12 11:35:45,748 views 38769 6166851584 Successfully retrieved 1 hackathons
+INFO 2025-03-12 11:35:45,748 views 38769 6166851584 Successfully retrieved 1 hackathons
+INFO 2025-03-12 11:35:46,093 views 38769 6166851584 Attempting to fetch hackathons list
+INFO 2025-03-12 11:35:46,093 views 38769 6166851584 Attempting to fetch hackathons list
+INFO 2025-03-12 11:35:46,098 views 38769 6166851584 Successfully retrieved 1 hackathons
+INFO 2025-03-12 11:35:46,098 views 38769 6166851584 Successfully retrieved 1 hackathons
+INFO 2025-03-12 11:35:57,014 views 38769 6166851584 Attempting to fetch hackathons list
+INFO 2025-03-12 11:35:57,014 views 38769 6166851584 Attempting to fetch hackathons list
+INFO 2025-03-12 11:35:57,020 views 38769 6166851584 Successfully retrieved 1 hackathons
+INFO 2025-03-12 11:35:57,020 views 38769 6166851584 Successfully retrieved 1 hackathons
+WARNING 2025-03-12 11:36:02,262 log 38769 6166851584 Not Found: /media/hackathons/ВТПО_Шаблон.png
+INFO 2025-03-12 11:36:05,768 autoreload 38769 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/hackathon/serializers.py changed, reloading.
+INFO 2025-03-12 11:36:06,032 autoreload 38880 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 11:36:37,758 autoreload 38880 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/hackathon/serializers.py changed, reloading.
+INFO 2025-03-12 11:36:38,093 autoreload 39011 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 11:36:44,328 autoreload 39011 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/hackathon/serializers.py changed, reloading.
+INFO 2025-03-12 11:36:44,563 autoreload 39045 8346241088 Watching for file changes with StatReloader
+WARNING 2025-03-12 11:36:45,642 log 39045 6135492608 Not Found: /media/hackathons/ВТПО_Шаблон.png
+INFO 2025-03-12 11:36:47,901 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 11:36:47,901 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 11:36:47,902 views 39045 6135492608 Cache miss for hackathon queryset
+INFO 2025-03-12 11:36:47,902 views 39045 6135492608 Cache miss for hackathon queryset
+INFO 2025-03-12 11:36:47,913 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 11:36:47,913 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 11:36:57,569 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 11:36:57,569 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 11:36:57,579 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 11:36:57,579 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 11:40:30,604 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 11:40:30,604 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 11:40:30,619 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 11:40:30,619 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 11:46:14,449 views 39045 6152318976 Attempting to fetch hackathons list
+INFO 2025-03-12 11:46:14,449 views 39045 6152318976 Attempting to fetch hackathons list
+INFO 2025-03-12 11:46:14,449 views 39045 6152318976 Cache miss for hackathon queryset
+INFO 2025-03-12 11:46:14,449 views 39045 6152318976 Cache miss for hackathon queryset
+INFO 2025-03-12 11:46:14,479 views 39045 6152318976 Successfully retrieved 1 hackathons
+INFO 2025-03-12 11:46:14,479 views 39045 6152318976 Successfully retrieved 1 hackathons
+INFO 2025-03-12 12:00:42,707 views 39045 6135492608 Cache miss for hackathon queryset
+INFO 2025-03-12 12:00:42,707 views 39045 6135492608 Cache miss for hackathon queryset
+WARNING 2025-03-12 12:00:47,575 log 39045 6135492608 Method Not Allowed: /api/hackathons/1/register/
+INFO 2025-03-12 12:11:07,961 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 12:11:07,961 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 12:11:07,963 views 39045 6135492608 Cache miss for hackathon queryset
+INFO 2025-03-12 12:11:07,963 views 39045 6135492608 Cache miss for hackathon queryset
+INFO 2025-03-12 12:11:07,987 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 12:11:07,987 views 39045 6135492608 Successfully retrieved 1 hackathons
+WARNING 2025-03-12 12:11:39,122 log 39045 6135492608 Method Not Allowed: /api/hackathons/1/register/
+INFO 2025-03-12 12:11:46,634 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 12:11:46,634 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 12:11:46,643 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 12:11:46,643 views 39045 6135492608 Successfully retrieved 1 hackathons

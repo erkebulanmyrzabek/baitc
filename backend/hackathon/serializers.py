@@ -1,56 +1,65 @@
 from rest_framework import serializers
-from .models import Hackathon, News, Webinar, CaseCup
+from django.utils import timezone
+from .models import Hackathon, Tag
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['id', 'name']
 
 class HackathonSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True, read_only=True)
+    participants_count = serializers.SerializerMethodField()
+    is_registered = serializers.SerializerMethodField()
+    can_register = serializers.SerializerMethodField()
+
     class Meta:
         model = Hackathon
-        fields = ['id', 'name', 'description', 'start_date', 'end_date']
-        
-    def validate(self, data):
-        """
-        Проверяем, что дата начала раньше даты окончания
-        """
-        if data['start_date'] > data['end_date']:
-            raise serializers.ValidationError({
-                "end_date": "Дата окончания должна быть позже даты начала"
-            })
-        return data
+        fields = [
+            'id', 'name', 'full_description', 'short_description', 'image',
+            'start_date', 'end_date', 'registration_deadline', 'max_participants',
+            'prize_pool', 'location', 'is_online', 'tags', 'requirements',
+            'participants_count', 'is_registered', 'can_register',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['participants_count', 'is_registered', 'can_register', 'created_at', 'updated_at']
 
-class NewsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = News
-        fields = ['id', 'title', 'content', 'image_url', 'created_at', 'updated_at']
+    def get_participants_count(self, obj):
+        return obj.participants.count()
 
-class WebinarSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Webinar
-        fields = ['id', 'title', 'description', 'speaker', 'date', 'duration', 'link', 'image_url']
+    def get_is_registered(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.participants.filter(id=request.user.id).exists()
+        return False
 
-    def validate_date(self, value):
-        """
-        Проверяем, что дата вебинара не в прошлом
-        """
-        from django.utils import timezone
-        if value < timezone.now():
-            raise serializers.ValidationError("Дата вебинара не может быть в прошлом")
-        return value
-
-class CaseCupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CaseCup
-        fields = ['id', 'name', 'description', 'company', 'prize_fund', 
-                 'start_date', 'end_date', 'registration_deadline', 'image_url']
+    def get_can_register(self, obj):
+        now = timezone.now()
+        if obj.registration_deadline < now:
+            return False
+        if obj.participants.count() >= obj.max_participants:
+            return False
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return not obj.participants.filter(id=request.user.id).exists()
+        return True
 
     def validate(self, data):
-        """
-        Проверяем корректность дат
-        """
-        if data['registration_deadline'] > data['start_date']:
+        if 'start_date' in data and 'end_date' in data:
+            if data['start_date'] >= data['end_date']:
+                raise serializers.ValidationError({
+                    "end_date": "Дата окончания должна быть позже даты начала"
+                })
+
+        if 'registration_deadline' in data and 'start_date' in data:
+            if data['registration_deadline'] >= data['start_date']:
+                raise serializers.ValidationError({
+                    "registration_deadline": "Дедлайн регистрации должен быть раньше даты начала"
+                })
+
+        if 'max_participants' in data and data['max_participants'] < 1:
             raise serializers.ValidationError({
-                "registration_deadline": "Дедлайн регистрации должен быть до начала кейс-чемпионата"
+                "max_participants": "Максимальное количество участников должно быть больше 0"
             })
-        if data['start_date'] > data['end_date']:
-            raise serializers.ValidationError({
-                "end_date": "Дата окончания должна быть позже даты начала"
-            })
+
         return data

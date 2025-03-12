@@ -45,9 +45,6 @@ onMounted(async () => {
 
     await Promise.all([
         fetchHackathons(),
-        fetchNews(),
-        fetchWebinars(),
-        fetchCaseCups()
     ])
 })
 
@@ -93,10 +90,15 @@ const fetchData = async (endpoint, cacheKey, timestampKey, loadingKey, errorKey,
         }
         
         const data = await response.json()
-        ref.value = data
+        // Проверяем формат данных
+        if (data.results) {
+            ref.value = data.results
+        } else {
+            ref.value = data
+        }
 
         // Сохраняем в кэш
-        localStorage.setItem(cacheKey, JSON.stringify(data))
+        localStorage.setItem(cacheKey, JSON.stringify(ref.value))
         localStorage.setItem(timestampKey, Date.now().toString())
     } catch (e) {
         console.error(`Ошибка при получении ${endpoint}:`, e)
@@ -115,33 +117,6 @@ const fetchHackathons = () => fetchData(
     hackathons
 )
 
-const fetchNews = () => fetchData(
-    'news/',
-    CACHE_KEYS.news,
-    CACHE_KEYS.newsTimestamp,
-    'news',
-    'news',
-    news
-)
-
-const fetchWebinars = () => fetchData(
-    'webinars/',
-    CACHE_KEYS.webinars,
-    CACHE_KEYS.webinarsTimestamp,
-    'webinars',
-    'webinars',
-    webinars
-)
-
-const fetchCaseCups = () => fetchData(
-    'case-cups/',
-    CACHE_KEYS.caseCups,
-    CACHE_KEYS.caseCupsTimestamp,
-    'caseCups',
-    'caseCups',
-    caseCups
-)
-
 // Функции обновления данных
 const refreshData = async (fetchFunction, cacheKey, timestampKey) => {
     localStorage.removeItem(cacheKey)
@@ -155,23 +130,77 @@ const refreshHackathons = () => refreshData(
     CACHE_KEYS.hackathonsTimestamp
 )
 
-const refreshNews = () => refreshData(
-    fetchNews,
-    CACHE_KEYS.news,
-    CACHE_KEYS.newsTimestamp
-)
+// Форматирование даты
+const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('ru-RU', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    })
+}
 
-const refreshWebinars = () => refreshData(
-    fetchWebinars,
-    CACHE_KEYS.webinars,
-    CACHE_KEYS.webinarsTimestamp
-)
+// Получение статуса регистрации
+const getRegistrationStatus = (hackathon) => {
+    const now = new Date()
+    const registrationDeadline = new Date(hackathon.registration_deadline)
+    
+    if (registrationDeadline < now) {
+        return 'Регистрация закрыта'
+    }
+    if (hackathon.participants_count >= hackathon.max_participants) {
+        return 'Нет свободных мест'
+    }
+    return 'Недоступно'
+}
 
-const refreshCaseCups = () => refreshData(
-    fetchCaseCups,
-    CACHE_KEYS.caseCups,
-    CACHE_KEYS.caseCupsTimestamp
-)
+// Регистрация на хакатон
+const registerForHackathon = async (hackathonId) => {
+    try {
+        const response = await fetch(`${API_URL}/api/hackathons/${hackathonId}/register/`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        })
+        
+        if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.error || 'Ошибка при регистрации')
+        }
+        
+        await refreshHackathons()
+    } catch (e) {
+        console.error('Ошибка при регистрации:', e)
+        // Здесь можно добавить отображение ошибки пользователю
+    }
+}
+
+// Отмена регистрации
+const unregisterFromHackathon = async (hackathonId) => {
+    try {
+        const response = await fetch(`${API_URL}/api/hackathons/${hackathonId}/unregister/`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        })
+        
+        if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.error || 'Ошибка при отмене регистрации')
+        }
+        
+        await refreshHackathons()
+    } catch (e) {
+        console.error('Ошибка при отмене регистрации:', e)
+        // Здесь можно добавить отображение ошибки пользователю
+    }
+}
 
 </script>
 
@@ -190,96 +219,62 @@ const refreshCaseCups = () => refreshData(
         <h2>Ближайшие хакатоны</h2>
         <RouterLink to="/hackathons" class="see-all">Смотреть все</RouterLink>
       </div>
-      <div class="hackathons-grid">
-        <div v-for="hackathon in hackathons" :key="hackathon.id" class="hackathon-card">
-          <div class="hackathon-image">
-            <img :src="hackathon.image" :alt="hackathon.name">
-            <span class="hackathon-date">{{ hackathon.start_date }}</span>
-          </div>
+      <div v-if="loading.hackathons" class="loading-state">
+        Загрузка хакатонов...
+      </div>
+      <div v-else-if="error.hackathons" class="error-state">
+        {{ error.hackathons }}
+        <button @click="refreshHackathons" class="retry-button">Повторить</button>
+      </div>
+      <div v-else-if="hackathons.length === 0" class="no-data">
+        Нет доступных хакатонов
+      </div>
+      <div v-else class="hackathons-grid">
+        <div v-for="hackathon in hackathons" :key="hackathon?.id || index" class="hackathon-card">
+          <!-- <div class="hackathon-image">
+            <img :src="hackathon.image || '/default-hackathon.jpg'" :alt="hackathon.name">
+            <span class="hackathon-date">{{ formatDate(hackathon.start_date) }}</span>
+          </div> -->
           <div class="hackathon-content">
             <h3>{{ hackathon.name }}</h3>
-            <p>{{ hackathon.description }}</p>
+            <p>{{ hackathon.short_description }}</p>
+            <div class="hackathon-info">
+              <div class="info-item">
+                <i class="fas fa-users"></i>
+                <span>{{ hackathon.participants_count || 0 }}/{{ hackathon.max_participants }}</span>
+              </div>
+              <div class="info-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ hackathon.is_online ? 'Онлайн' : (hackathon.location || 'Не указано') }}</span>
+              </div>
+            </div>
             <div class="hackathon-footer">
               <div class="tags">
-                <span v-for="tag in hackathon.tags" :key="tag" class="tag">{{ tag }}</span>
+                <span v-for="tag in (hackathon.tags || [])" :key="tag.id" class="tag">{{ tag.name }}</span>
               </div>
-              <button class="join-button">Участвовать</button>
+              <button 
+                v-if="hackathon.is_registered" 
+                @click="unregisterFromHackathon(hackathon.id)"
+                class="unregister-button"
+              >
+                Отменить участие
+              </button>
+              <button 
+                v-else-if="hackathon.can_register" 
+                @click="registerForHackathon(hackathon.id)"
+                class="join-button"
+              >
+                Участвовать
+              </button>
+              <span v-else class="registration-closed">
+                {{ getRegistrationStatus(hackathon) }}
+              </span>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="news-section">
-      <div class="section-header">
-        <h2>Последние новости</h2>
-        <RouterLink to="/news" class="see-all">Смотреть все</RouterLink>
-      </div>
-      <div class="news-grid">
-        <div v-for="item in news" :key="item.id" class="news-card">
-          <div class="news-image">
-            <img :src="item.image" :alt="item.title">
-            <span class="news-date">{{ item.date }}</span>
-          </div>
-          <div class="news-content">
-            <h3>{{ item.title }}</h3>
-            <p>{{ item.description }}</p>
-            <RouterLink :to="'/news/' + item.id" class="read-more">Читать далее</RouterLink>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="webinars-section">
-      <div class="section-header">
-        <h2>Предстоящие вебинары</h2>
-        <RouterLink to="/webinars" class="see-all">Смотреть все</RouterLink>
-      </div>
-      <div class="webinars-grid">
-        <div v-for="webinar in webinars" :key="webinar.id" class="webinar-card">
-          <div class="webinar-image">
-            <img :src="webinar.image" :alt="webinar.title">
-            <span class="webinar-date">{{ webinar.date }}</span>
-          </div>
-          <div class="webinar-content">
-            <h3>{{ webinar.title }}</h3>
-            <p>{{ webinar.description }}</p>
-            <div class="webinar-footer">
-              <div class="webinar-info">
-                <span class="speaker">{{ webinar.speaker }}</span>
-                <span class="duration">{{ webinar.duration }}</span>
-              </div>
-              <button class="register-button">Зарегистрироваться</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="case-cups-section">
-      <div class="section-header">
-        <h2>Кейс-чемпионаты</h2>
-        <RouterLink to="/case-cups" class="see-all">Смотреть все</RouterLink>
-      </div>
-      <div class="case-cups-grid">
-        <div v-for="caseCup in caseCups" :key="caseCup.id" class="case-cup-card">
-          <div class="case-cup-image">
-            <img :src="caseCup.image" :alt="caseCup.title">
-            <span class="case-cup-date">{{ caseCup.date }}</span>
-          </div>
-          <div class="case-cup-content">
-            <h3>{{ caseCup.title }}</h3>
-            <p>{{ caseCup.description }}</p>
-            <div class="case-cup-footer">
-              <div class="tags">
-                <span v-for="tag in caseCup.tags" :key="tag" class="tag">{{ tag }}</span>
-              </div>
-              <button class="participate-button">Участвовать</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
   </div>
 </template>
 
@@ -438,7 +433,6 @@ const refreshCaseCups = () => refreshData(
 .join-button:hover {
   background: #4f46e5;
 }
-
 
 .user-card {
   background: white;
@@ -782,6 +776,69 @@ const refreshCaseCups = () => refreshData(
 
 .participate-button:hover {
   background: #4f46e5;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 20px;
+  color: #6b7280;
+}
+
+.error-state {
+  text-align: center;
+  padding: 20px;
+  color: #ef4444;
+}
+
+.retry-button {
+  background: #6366f1;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.hackathon-info {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.unregister-button {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.unregister-button:hover {
+  background: #dc2626;
+}
+
+.registration-closed {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  font-size: 1.1rem;
 }
 
 @media (max-width: 768px) {

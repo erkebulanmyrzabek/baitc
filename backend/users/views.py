@@ -3,9 +3,8 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from django.contrib.auth.models import User
-from .models import UserProfile
-from .serializers import UserProfileSerializer
+from .models import User
+from .serializers import UserSerializer
 
 # Create your views here.
 
@@ -22,30 +21,27 @@ def register_telegram_user(request):
         return Response({'error': 'telegram_id is required'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        # Проверяем существует ли профиль с таким telegram_id
-        profile = UserProfile.objects.filter(telegram_id=telegram_id).first()
+        # Проверяем существует ли пользователь с таким telegram_id
+        user = User.objects.filter(telegram_id=telegram_id).first()
         
-        if not profile:
-            # Создаем нового пользователя Django
-            user = User.objects.create_user(
-                username=username or f"tg_{telegram_id}",
-                first_name=first_name or "",
-                last_name=last_name or ""
-            )
-            
-            # Создаем профиль пользователя
-            profile = UserProfile.objects.create(
-                user=user,
+        if not user:
+            # Создаем нового пользователя
+            user = User.objects.create(
+                name=f"{first_name or ''} {last_name or ''}".strip() or f"User_{telegram_id}",
                 telegram_id=telegram_id
             )
+            
+            if photo_url:
+                user.avatar = photo_url
+            
+        # Обновляем данные пользователя если нужно
+        if photo_url and not user.avatar:
+            user.avatar = photo_url
+        user.save()
 
-        # Обновляем данные профиля
-        if photo_url:
-            profile.photo = photo_url
-        profile.save()
-
-        serializer = UserProfileSerializer(profile)
+        serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
