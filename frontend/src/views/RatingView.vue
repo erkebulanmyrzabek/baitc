@@ -1,360 +1,181 @@
 <template>
   <div class="rating-page">
-    <div class="rating-header">
+    <div class="header">
       <h1>Рейтинг участников</h1>
-      <p class="rating-description">
-        Рейтинг формируется на основе участия в хакатонах, кейс-чемпионатах и вебинарах. 
-        За каждое участие начисляются баллы в зависимости от типа мероприятия и результата.
-      </p>
-    </div>
-
-    <div class="filters-section">
-      <div class="search-filter">
-        <input 
-          type="text" 
-          v-model="searchQuery" 
-          placeholder="Поиск по имени..."
-          @input="filterParticipants"
-        >
-      </div>
-
-      <div class="period-filter">
-        <select v-model="selectedPeriod" @change="filterParticipants">
-          <option value="all">За все время</option>
-          <option value="month">За месяц</option>
-          <option value="year">За год</option>
-        </select>
-      </div>
-
-      <div class="activity-filter">
-        <select v-model="selectedActivity" @change="filterParticipants">
-          <option value="all">Все активности</option>
-          <option value="hackathons">Хакатоны</option>
-          <option value="casecups">Кейс-чемпионаты</option>
-          <option value="webinars">Вебинары</option>
+      <div class="filters">
+        <input type="text" v-model="searchQuery" placeholder="Поиск участников..." class="search-input">
+        <select v-model="sortBy" class="sort-select">
+          <option value="rating">По рейтингу</option>
+          <option value="name">По имени</option>
+          <option value="hackathons">По количеству хакатонов</option>
         </select>
       </div>
     </div>
 
-    <div class="rating-table-container">
-      <table class="rating-table">
-        <thead>
-          <tr>
-            <th>Место</th>
-            <th>Участник</th>
-            <th>Баллы</th>
-            <th>Хакатоны</th>
-            <th>Кейс-чемпионаты</th>
-            <th>Вебинары</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(participant, index) in paginatedParticipants" 
-              :key="participant.id"
-              :class="{ 'current-user': participant.id === currentUserId }">
-            <td class="rank">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
-            <td class="participant-info">
-              <img :src="participant.avatar" :alt="participant.name" class="avatar">
-              <span class="name">{{ participant.name }}</span>
-            </td>
-            <td class="points">{{ participant.points }}</td>
-            <td>{{ participant.hackathons_count }}</td>
-            <td>{{ participant.casecups_count }}</td>
-            <td>{{ participant.webinars_count }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="pagination" v-if="totalPages > 1">
-      <button 
-        :disabled="currentPage === 1" 
-        @click="changePage(currentPage - 1)"
-        class="pagination-btn"
-      >
-        <i class="fas fa-chevron-left"></i>
-      </button>
-
-      <button 
-        v-for="page in displayedPages" 
-        :key="page"
-        :class="['pagination-btn', { active: page === currentPage }]"
-        @click="changePage(page)"
-      >
-        {{ page }}
-      </button>
-
-      <button 
-        :disabled="currentPage === totalPages" 
-        @click="changePage(currentPage + 1)"
-        class="pagination-btn"
-      >
-        <i class="fas fa-chevron-right"></i>
-      </button>
+    <div class="leaderboard">
+      <div v-for="(participant, index) in filteredParticipants" :key="participant.id" class="participant-card">
+        <div class="rank">{{ index + 1 }}</div>
+        <div class="participant-info">
+          <div class="participant-image">
+            <img :src="participant.avatar_url || '/default-avatar.jpg'" :alt="participant.name">
+          </div>
+          <div class="participant-details">
+            <h3>{{ participant.name }}</h3>
+            <p class="stats">
+              <span class="stat">
+                <span class="label">Рейтинг:</span>
+                <span class="value">{{ participant.rating }}</span>
+              </span>
+              <span class="stat">
+                <span class="label">Хакатонов пройдено:</span>
+                <span class="value">{{ participant.hackathons_completed }}</span>
+              </span>
+              <span class="stat">
+                <span class="label">Побед:</span>
+                <span class="value">{{ participant.victories }}</span>
+              </span>
+            </p>
+          </div>
+          <div class="achievement-badges">
+            <div v-for="badge in participant.badges" :key="badge.id" class="badge" :title="badge.name">
+              🏆
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script>
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
-const participants = ref([])
-const searchQuery = ref('')
-const selectedPeriod = ref('all')
-const selectedActivity = ref('all')
-const currentPage = ref(1)
-const itemsPerPage = 20
-const currentUserId = ref(null) // Получаем из хранилища или API
-
-// Фильтрация участников
-const filteredParticipants = computed(() => {
-  return participants.value.filter(participant => {
-    const matchesSearch = participant.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesActivity = selectedActivity.value === 'all' || 
-                          (selectedActivity.value === 'hackathons' && participant.hackathons_count > 0) ||
-                          (selectedActivity.value === 'casecups' && participant.casecups_count > 0) ||
-                          (selectedActivity.value === 'webinars' && participant.webinars_count > 0)
-    return matchesSearch && matchesActivity
-  })
-})
-
-// Пагинация
-const totalPages = computed(() => {
-  return Math.ceil(filteredParticipants.value.length / itemsPerPage)
-})
-
-const paginatedParticipants = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredParticipants.value.slice(start, end)
-})
-
-const displayedPages = computed(() => {
-  const delta = 2
-  const range = []
-  const rangeWithDots = []
-  let l
-
-  for (let i = 1; i <= totalPages.value; i++) {
-    if (i === 1 || i === totalPages.value || 
-        (i >= currentPage.value - delta && i <= currentPage.value + delta)) {
-      range.push(i)
+export default {
+  data() {
+    return {
+      participants: [],
+      searchQuery: '',
+      sortBy: 'rating'
     }
-  }
-
-  range.forEach(i => {
-    if (l) {
-      if (i - l === 2) {
-        rangeWithDots.push(l + 1)
-      } else if (i - l !== 1) {
-        rangeWithDots.push('...')
+  },
+  computed: {
+    filteredParticipants() {
+      return this.participants.filter(participant => 
+        participant.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+      )
+    }
+  },
+  methods: {
+    async fetchParticipants() {
+      try {
+        const response = await axios.get(`${API_URL}/api/participants/`)
+        this.participants = response.data
+      } catch (err) {
+        console.error('Ошибка при загрузке участников:', err)
       }
     }
-    rangeWithDots.push(i)
-    l = i
-  })
-
-  return rangeWithDots
-})
-
-// Методы
-const filterParticipants = () => {
-  currentPage.value = 1
-}
-
-const changePage = (page) => {
-  currentPage.value = page
-}
-
-const fetchParticipants = async () => {
-  try {
-    const response = await axios.get('/api/rating', {
-      params: {
-        period: selectedPeriod.value
-      }
-    })
-    participants.value = response.data
-  } catch (error) {
-    console.error('Error fetching participants:', error)
+  },
+  mounted() {
+    this.fetchParticipants()
   }
 }
-
-onMounted(() => {
-  fetchParticipants()
-})
 </script>
 
-<style scoped>
+  <style scoped>
 .rating-page {
-  max-width: 1200px;
-  margin: 0 auto;
   padding: 20px;
 }
 
-.rating-header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.rating-header h1 {
-  font-size: 2.5rem;
-  color: #1f2937;
-  margin-bottom: 15px;
-}
-
-.rating-description {
-  color: #6b7280;
-  max-width: 800px;
-  margin: 0 auto;
-  line-height: 1.6;
-}
-
-.filters-section {
-  display: flex;
-  gap: 20px;
+.header {
   margin-bottom: 30px;
-  flex-wrap: wrap;
 }
 
-.search-filter input,
-.period-filter select,
-.activity-filter select {
-  padding: 10px 15px;
-  border: 1px solid #e5e7eb;
+.header h1 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.search-input, .sort-select {
+  padding: 10px;
+  border: 1px solid #ddd;
   border-radius: 8px;
-  font-size: 0.95rem;
-  color: #4b5563;
-  background-color: white;
-  transition: all 0.3s ease;
+  font-size: 16px;
 }
 
-.search-filter input {
-  width: 300px;
+.search-input {
+  flex: 1;
 }
 
-.search-filter input:focus,
-.period-filter select:focus,
-.activity-filter select:focus {
-  outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+.participants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
 }
 
-.rating-table-container {
-  background: white;
+.participant-card {
+  border: 1px solid #eee;
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  overflow: hidden;
-  margin-bottom: 30px;
+  padding: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.rating-table {
-  width: 100%;
-  border-collapse: collapse;
+.participant-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
-.rating-table th {
-  background: #f9fafb;
-  padding: 15px;
-  text-align: left;
-  font-weight: 600;
-  color: #4b5563;
-  border-bottom: 1px solid #e5e7eb;
+.participant-info h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.4em;
+  color: #2c3e50;
 }
 
-.rating-table td {
-  padding: 15px;
-  border-bottom: 1px solid #e5e7eb;
-  color: #1f2937;
+.stats {
+  margin: 15px 0;
 }
 
-.rating-table tr:last-child td {
-  border-bottom: none;
-}
-
-.participant-info {
+.stat-item {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #666;
 }
 
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
+.label {
+  font-size: 0.9em;
 }
 
-.rank {
-  font-weight: 600;
-  color: #6366f1;
+.value {
+  color: #2c3e50;
+  font-weight: 500;
 }
 
-.points {
-  font-weight: 600;
-  color: #059669;
-}
-
-.current-user {
-  background-color: #f3f4f6;
-}
-
-.pagination {
+.achievement-badges {
   display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 30px;
+  gap: 10px;
+  margin-top: 15px;
 }
 
-.pagination-btn {
-  padding: 8px 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  background: white;
-  color: #4b5563;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: #f3f4f6;
-  border-color: #d1d5db;
-}
-
-.pagination-btn.active {
-  background: #6366f1;
-  color: white;
-  border-color: #6366f1;
-}
-
-.pagination-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.badge {
+  font-size: 24px;
+  cursor: help;
 }
 
 @media (max-width: 768px) {
-  .rating-header h1 {
-    font-size: 2rem;
-  }
-
-  .filters-section {
+  .filters {
     flex-direction: column;
   }
-
-  .search-filter input {
-    width: 100%;
-  }
-
-  .rating-table {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .rating-table th,
-  .rating-table td {
-    white-space: nowrap;
+  
+  .participants-grid {
+    grid-template-columns: 1fr;
   }
 }
-</style>
+  </style>

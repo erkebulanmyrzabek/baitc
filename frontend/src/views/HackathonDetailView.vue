@@ -228,15 +228,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.btn-primary {
-  @apply px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-500 transform hover:scale-105 text-center;
-}
 
-.btn-secondary {
-  @apply px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-500 transform hover:scale-105;
-}
-
-.prose {
-  @apply text-gray-600 text-sm leading-relaxed;
-}
 </style> 

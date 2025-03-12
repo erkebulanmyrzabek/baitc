@@ -210,44 +210,72 @@ const refreshCaseCups = () => refreshData(
       </div>
     </section>
 
-    <section class="leaderboard-section">
+    <section class="news-section">
       <div class="section-header">
-        <h2>Топ участников</h2>
-        <RouterLink to="/rating" class="see-all">Полный рейтинг</RouterLink>
+        <h2>Последние новости</h2>
+        <RouterLink to="/news" class="see-all">Смотреть все</RouterLink>
       </div>
-      <div class="leaderboard-grid">
-        <div v-for="user in topUsers" :key="user.id" class="user-card">
-          <div class="user-rank">#{{ user.rank }}</div>
-          <img :src="user.avatar" :alt="user.name" class="user-avatar">
-          <div class="user-info">
-            <h3>{{ user.name }}</h3>
-            <p>{{ user.points }} очков</p>
+      <div class="news-grid">
+        <div v-for="item in news" :key="item.id" class="news-card">
+          <div class="news-image">
+            <img :src="item.image" :alt="item.title">
+            <span class="news-date">{{ item.date }}</span>
           </div>
-          <div class="user-achievements">
-            <img v-for="achievement in user.achievements.slice(0, 3)" 
-                 :key="achievement.id" 
-                 :src="achievement.icon" 
-                 :alt="achievement.name"
-                 :title="achievement.name">
+          <div class="news-content">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description }}</p>
+            <RouterLink :to="'/news/' + item.id" class="read-more">Читать далее</RouterLink>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="shop-preview-section">
+    <section class="webinars-section">
       <div class="section-header">
-        <h2>Магазин</h2>
-        <RouterLink to="/shop" class="see-all">Перейти в магазин</RouterLink>
+        <h2>Предстоящие вебинары</h2>
+        <RouterLink to="/webinars" class="see-all">Смотреть все</RouterLink>
       </div>
-      <div class="items-grid">
-        <div v-for="item in featuredItems" :key="item.id" class="shop-item">
-          <div class="item-image">
-            <img :src="item.image" :alt="item.name">
+      <div class="webinars-grid">
+        <div v-for="webinar in webinars" :key="webinar.id" class="webinar-card">
+          <div class="webinar-image">
+            <img :src="webinar.image" :alt="webinar.title">
+            <span class="webinar-date">{{ webinar.date }}</span>
           </div>
-          <div class="item-content">
-            <h3>{{ item.name }}</h3>
-            <p class="item-price">{{ item.price }} очков</p>
-            <button class="buy-button">Купить</button>
+          <div class="webinar-content">
+            <h3>{{ webinar.title }}</h3>
+            <p>{{ webinar.description }}</p>
+            <div class="webinar-footer">
+              <div class="webinar-info">
+                <span class="speaker">{{ webinar.speaker }}</span>
+                <span class="duration">{{ webinar.duration }}</span>
+              </div>
+              <button class="register-button">Зарегистрироваться</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="case-cups-section">
+      <div class="section-header">
+        <h2>Кейс-чемпионаты</h2>
+        <RouterLink to="/case-cups" class="see-all">Смотреть все</RouterLink>
+      </div>
+      <div class="case-cups-grid">
+        <div v-for="caseCup in caseCups" :key="caseCup.id" class="case-cup-card">
+          <div class="case-cup-image">
+            <img :src="caseCup.image" :alt="caseCup.title">
+            <span class="case-cup-date">{{ caseCup.date }}</span>
+          </div>
+          <div class="case-cup-content">
+            <h3>{{ caseCup.title }}</h3>
+            <p>{{ caseCup.description }}</p>
+            <div class="case-cup-footer">
+              <div class="tags">
+                <span v-for="tag in caseCup.tags" :key="tag" class="tag">{{ tag }}</span>
+              </div>
+              <button class="participate-button">Участвовать</button>
+            </div>
           </div>
         </div>
       </div>
@@ -411,12 +439,6 @@ const refreshCaseCups = () => refreshData(
   background: #4f46e5;
 }
 
-.leaderboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-  padding: 0 20px;
-}
 
 .user-card {
   background: white;
@@ -524,6 +546,244 @@ const refreshCaseCups = () => refreshData(
   background: #4f46e5;
 }
 
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 0 20px;
+}
+
+.news-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.news-card:hover {
+  transform: translateY(-2px);
+}
+
+.news-image {
+  position: relative;
+  height: 160px;
+}
+
+.news-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.news-date {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.news-content {
+  padding: 20px;
+}
+
+.news-content h3 {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+  color: #1f2937;
+}
+
+.news-content p {
+  color: #6b7280;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.read-more {
+  color: #6366f1;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.webinars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 0 20px;
+}
+
+.webinar-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.webinar-card:hover {
+  transform: translateY(-2px);
+}
+
+.webinar-image {
+  position: relative;
+  height: 160px;
+}
+
+.webinar-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.webinar-date {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.webinar-content {
+  padding: 20px;
+}
+
+.webinar-content h3 {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+  color: #1f2937;
+}
+
+.webinar-content p {
+  color: #6b7280;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
+
+.webinar-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.webinar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.speaker {
+  font-weight: 500;
+  color: #4b5563;
+  font-size: 0.9rem;
+}
+
+.duration {
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.register-button {
+  background: #6366f1;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.register-button:hover {
+  background: #4f46e5;
+}
+
+.case-cups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 0 20px;
+}
+
+.case-cup-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.case-cup-card:hover {
+  transform: translateY(-2px);
+}
+
+.case-cup-image {
+  position: relative;
+  height: 160px;
+}
+
+.case-cup-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.case-cup-date {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.case-cup-content {
+  padding: 20px;
+}
+
+.case-cup-content h3 {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+  color: #1f2937;
+}
+
+.case-cup-content p {
+  color: #6b7280;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
+
+.case-cup-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.participate-button {
+  background: #6366f1;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.participate-button:hover {
+  background: #4f46e5;
+}
+
 @media (max-width: 768px) {
   .hero-section {
     padding: 60px 20px;
@@ -539,7 +799,10 @@ const refreshCaseCups = () => refreshData(
 
   .hackathons-grid,
   .leaderboard-grid,
-  .items-grid {
+  .items-grid,
+  .news-grid,
+  .webinars-grid,
+  .case-cups-grid {
     grid-template-columns: 1fr;
   }
 }
