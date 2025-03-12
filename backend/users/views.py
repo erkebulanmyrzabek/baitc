@@ -148,6 +148,7 @@ def telegram_auth(request):
         )
 
 @api_view(['GET', 'PUT'])
+@permission_classes([AllowAny])
 def user_profile(request):
     """
     GET: Получение данных профиля

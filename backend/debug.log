@@ -390,3 +390,12 @@ INFO 2025-03-12 18:19:28,006 autoreload 89661 8346241088 Watching for file chang
 WARNING 2025-03-12 18:19:30,212 log 89661 6170701824 Not Found: /
 WARNING 2025-03-12 18:19:36,600 log 89661 6170701824 Not Found: /api/users/
 WARNING 2025-03-12 18:19:47,278 log 89661 6170701824 Forbidden: /api/users/users/profile/
+INFO 2025-03-12 19:47:33,941 autoreload 9382 8346241088 Watching for file changes with StatReloader
+WARNING 2025-03-12 19:47:35,756 log 9382 6159593472 Not Found: /api/auth/telegram/
+WARNING 2025-03-12 19:49:24,366 log 9382 6159593472 Forbidden: /api/users/users/profile/
+WARNING 2025-03-12 19:49:45,781 log 9382 6159593472 Forbidden: /api/users/users/profile/
+WARNING 2025-03-12 19:52:08,732 log 9382 6159593472 Forbidden: /api/users/users/profile/
+INFO 2025-03-12 19:52:28,596 autoreload 9382 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/users/views.py changed, reloading.
+INFO 2025-03-12 19:52:28,978 autoreload 10712 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 19:52:30,165 autoreload 10712 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/users/views.py changed, reloading.
+INFO 2025-03-12 19:52:30,423 autoreload 10715 8346241088 Watching for file changes with StatReloader

@@ -202,8 +202,6 @@ const unregisterFromHackathon = async (hackathonId) => {
     }
 }
 
-
-
 </script>
 
 <template>
