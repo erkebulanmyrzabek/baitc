@@ -1,40 +1,54 @@
 from django.db import models
-from django.contrib.auth.models import User
-import uuid
-from django.core.files.storage import FileSystemStorage
+from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
-import os
-
-user_img_url = FileSystemStorage(
-    location=os.path.join(settings.BASE_DIR, 'static', 'img', 'user_img'),  
-    base_url='/static/img/user_img'
-)
 
 class User(models.Model):
-    THEME_CHOICES = [
-        ('light', 'Светлая'),
-        ('dark', 'Темная')
-    ]
-    
-    LANGUAGE_CHOICES = [
-        ('ru', 'Русский'),
-        ('en', 'Английский')
-    ]
-    
-    telegram_id = models.BigIntegerField(unique=True, null=True, blank=True)
-    name = models.CharField(max_length=100)
-    coin = models.IntegerField(default=0)
-    xp = models.IntegerField(default=0)
-    level = models.IntegerField(default=1)
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
-    friends = models.ManyToManyField('self', blank=True, symmetrical=True)
-    is_premium = models.BooleanField(default=False)
-    theme = models.CharField(max_length=10, choices=THEME_CHOICES, default='light')
-    language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='ru')
-    email = models.EmailField(blank=True, null=True)
+    telegram_id = models.CharField(max_length=255, unique=True)
+    username = models.CharField(max_length=150, unique=True)
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
+    photo_url = models.URLField(max_length=500, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    age = models.PositiveIntegerField(blank=True, null=True)
+    gender = models.CharField(
+        max_length=10,
+        choices=[
+            ('male', 'Мужской'),
+            ('female', 'Женский'),
+            ('other', 'Другой')
+        ],
+        blank=True,
+        null=True
+    )
+    tech_stack = ArrayField(
+        models.CharField(max_length=50),
+        blank=True,
+        default=list
+    )
+    language = models.CharField(
+        max_length=5,
+        choices=[
+            ('ru', 'Русский'),
+            ('en', 'English'),
+            ('kk', 'Қазақша')
+        ],
+        default='ru'
+    )
+    theme = models.CharField(
+        max_length=10,
+        choices=[
+            ('system', 'Системная'),
+            ('light', 'Светлая'),
+            ('dark', 'Темная')
+        ],
+        default='system'
+    )
+    xp = models.PositiveIntegerField(default=0)
+    level = models.PositiveIntegerField(default=1)
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.username} ({self.telegram_id})"
     
     def add_xp(self, amount):
         """Добавляет опыт пользователю и обновляет уровень"""
@@ -48,7 +62,8 @@ class User(models.Model):
     def participation_count(self):
         """Возвращает количество хакатонов, в которых участвовал пользователь"""
         return self.hackathons.count()
-
-    class Meta:
-        verbose_name = 'User'
-        verbose_name_plural = 'Users'
+    
+    def level_up(self):
+        """Повышает уровень пользователя"""
+        self.level += 1
+        self.save()

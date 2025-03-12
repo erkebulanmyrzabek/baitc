@@ -1,6 +1,7 @@
 from django.urls import path
-from . import views
+from .views import TelegramAuthView, UserProfileView
 
 urlpatterns = [
-    path('register-telegram', views.register_telegram_user, name='register-telegram'),
+    path('auth/telegram/', TelegramAuthView.as_view(), name='telegram-auth'),
+    path('users/profile/', UserProfileView.as_view(), name='user-profile'),
 ] 

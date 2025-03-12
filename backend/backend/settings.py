@@ -166,10 +166,9 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'rest_framework.filters.SearchFilter',
@@ -177,3 +176,7 @@ REST_FRAMEWORK = {
     ],
     'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler'
 }
+
+
+
+# Указываем кастомную модель пользователя

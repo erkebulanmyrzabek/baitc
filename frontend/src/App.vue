@@ -1,37 +1,83 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import { onMounted } from 'vue'
-import axios from 'axios'
-import Navbar from './components/Navbar.vue'
-const initTelegramUser = async () => {
-  try {
-    const telegramUser = window.Telegram.WebApp.initDataUnsafe.user
-    if (telegramUser) {
-      const response = await axios.post('/api/users/register-telegram', {
-        telegram_id: telegramUser.id.toString(),
-        username: telegramUser.username,
-        first_name: telegramUser.first_name,
-        last_name: telegramUser.last_name,
-        photo_url: telegramUser.photo_url
-      })
-      console.log('User registered:', response.data)
-    }
-  } catch (error) {
-    console.error('Error registering user:', error)
-  }
-}
-onMounted(() => {
-  initTelegramUser()
-})
-
-
-</script>
-
 <template>
-  <RouterView />
-  <Navbar />
+    <div class="app">
+        <div v-if="loading" class="loading-screen">
+            <div class="loader"></div>
+            <p>Загрузка...</p>
+        </div>
+        
+        <div v-else-if="error" class="error-screen">
+            <p>{{ error }}</p>
+            <button @click="retryAuth" class="retry-button">Повторить</button>
+        </div>
+
+        <router-view v-else />
+    </div>
 </template>
 
-<style scoped>
+<script setup>
+import { onMounted } from 'vue';
+import { useAuth } from './composables/useAuth';
+import { useRouter } from 'vue-router';
 
+const { loading, error, initializeAuth } = useAuth();
+const router = useRouter();
+
+const retryAuth = () => {
+    initializeAuth();
+};
+
+onMounted(async () => {
+    await initializeAuth();
+});
+</script>
+
+<style>
+.app {
+    min-height: 100vh;
+}
+
+.loading-screen,
+.error-screen {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+}
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.error-screen {
+    color: #ef4444;
+}
+
+.retry-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.retry-button:hover {
+    background: #4f46e5;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 </style>

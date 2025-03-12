@@ -349,3 +349,39 @@ INFO 2025-03-12 12:11:46,634 views 39045 6135492608 Attempting to fetch hackatho
 INFO 2025-03-12 12:11:46,634 views 39045 6135492608 Attempting to fetch hackathons list
 INFO 2025-03-12 12:11:46,643 views 39045 6135492608 Successfully retrieved 1 hackathons
 INFO 2025-03-12 12:11:46,643 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 12:37:46,022 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 12:37:46,022 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 12:37:46,024 views 39045 6135492608 Cache miss for hackathon queryset
+INFO 2025-03-12 12:37:46,024 views 39045 6135492608 Cache miss for hackathon queryset
+INFO 2025-03-12 12:37:46,043 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 12:37:46,043 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 12:37:46,564 views 39045 6152318976 Attempting to fetch hackathons list
+INFO 2025-03-12 12:37:46,564 views 39045 6152318976 Attempting to fetch hackathons list
+INFO 2025-03-12 12:37:46,569 views 39045 6152318976 Successfully retrieved 1 hackathons
+INFO 2025-03-12 12:37:46,569 views 39045 6152318976 Successfully retrieved 1 hackathons
+INFO 2025-03-12 12:37:55,188 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 12:37:55,188 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 12:37:55,198 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 12:37:55,198 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 12:39:56,102 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 12:39:56,102 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 12:39:56,118 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 12:39:56,118 views 39045 6135492608 Successfully retrieved 1 hackathons
+WARNING 2025-03-12 12:59:12,905 log 39045 6152318976 Not Found: /api/users/profile/
+INFO 2025-03-12 13:09:45,650 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 13:09:45,650 views 39045 6135492608 Attempting to fetch hackathons list
+INFO 2025-03-12 13:09:45,657 views 39045 6135492608 Cache miss for hackathon queryset
+INFO 2025-03-12 13:09:45,657 views 39045 6135492608 Cache miss for hackathon queryset
+INFO 2025-03-12 13:09:45,674 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 13:09:45,674 views 39045 6135492608 Successfully retrieved 1 hackathons
+INFO 2025-03-12 14:58:59,475 autoreload 39045 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/users/urls.py changed, reloading.
+INFO 2025-03-12 14:58:59,948 autoreload 63223 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 14:59:20,406 autoreload 63223 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/users/models.py changed, reloading.
+INFO 2025-03-12 14:59:20,686 autoreload 63330 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 15:02:01,249 autoreload 64076 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 16:33:37,335 autoreload 77613 8346241088 Watching for file changes with StatReloader
+WARNING 2025-03-12 16:33:40,078 log 77613 6123237376 Not Found: /
+WARNING 2025-03-12 16:33:47,418 log 77613 6123237376 Not Found: /api/users
+WARNING 2025-03-12 16:33:53,306 log 77613 6123237376 Not Found: /api/users/
+WARNING 2025-03-12 16:34:01,617 log 77613 6123237376 Forbidden: /api/users/auth/telegram/
+WARNING 2025-03-12 16:34:13,905 log 77613 6123237376 Forbidden: /api/users/users/profile/

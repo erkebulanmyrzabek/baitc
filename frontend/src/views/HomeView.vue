@@ -202,6 +202,8 @@ const unregisterFromHackathon = async (hackathonId) => {
     }
 }
 
+
+
 </script>
 
 <template>
@@ -276,7 +278,32 @@ const unregisterFromHackathon = async (hackathonId) => {
     </section>
 
   </div>
+
+  <div>
+    <button @click="requestPhoneNumber">Предоставить номер телефона</button>
+  </div>
+
+
+
 </template>
+
+<script>
+export default {
+  methods: {
+    requestPhoneNumber() {
+      const { WebApp } = window.Telegram;
+      WebApp.onEvent('contact', (contact) => {
+        // Отправьте полученный номер телефона на сервер для обработки
+        this.sendPhoneNumberToServer(contact.phone_number);
+      });
+      WebApp.requestContact();
+    },
+    sendPhoneNumberToServer(phoneNumber) {
+      // Реализуйте отправку номера телефона на сервер
+    }
+  }
+};
+</script>
 
 <style scoped>
 .home {
