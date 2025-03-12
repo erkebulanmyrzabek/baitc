@@ -399,3 +399,17 @@ INFO 2025-03-12 19:52:28,596 autoreload 9382 8346241088 /Users/erkebulanmyrzabek
 INFO 2025-03-12 19:52:28,978 autoreload 10712 8346241088 Watching for file changes with StatReloader
 INFO 2025-03-12 19:52:30,165 autoreload 10712 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/users/views.py changed, reloading.
 INFO 2025-03-12 19:52:30,423 autoreload 10715 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 20:06:55,185 autoreload 14155 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 20:08:20,191 autoreload 14155 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/users/views.py changed, reloading.
+INFO 2025-03-12 20:08:20,575 autoreload 14474 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 20:08:33,953 autoreload 14474 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/users/views.py changed, reloading.
+INFO 2025-03-12 20:08:34,237 autoreload 14530 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 20:08:48,023 views 14530 6128185344 Updated user with telegram_id: 5690145195
+INFO 2025-03-12 20:14:51,857 autoreload 14530 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/users/views.py changed, reloading.
+INFO 2025-03-12 20:14:52,237 autoreload 16030 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 20:15:04,661 autoreload 16030 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/users/views.py changed, reloading.
+INFO 2025-03-12 20:15:04,992 autoreload 16087 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 20:15:19,389 autoreload 16087 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/backend/settings.py changed, reloading.
+INFO 2025-03-12 20:15:19,653 autoreload 16164 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-12 20:16:00,675 autoreload 16164 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/backend/settings.py changed, reloading.
+INFO 2025-03-12 20:16:01,007 autoreload 16328 8346241088 Watching for file changes with StatReloader

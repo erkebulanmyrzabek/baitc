@@ -38,9 +38,63 @@ const CACHE_KEYS = {
 
 const API_URL = import.meta.env.VITE_API_URL 
 
+// Функция аутентификации через Telegram
+const authenticateWithTelegram = async () => {
+    try {
+        if (!MiniApp.initDataUnsafe?.user) {
+            throw new Error('Не удалось получить данные пользователя из Telegram')
+        }
+
+        const userData = {
+            telegram_id: MiniApp.initDataUnsafe.user.id.toString(), // Важно преобразовать в строку
+            username: MiniApp.initDataUnsafe.user.username || '',
+            first_name: MiniApp.initDataUnsafe.user.first_name || '',
+            last_name: MiniApp.initDataUnsafe.user.last_name || '',
+            photo_url: MiniApp.initDataUnsafe.user.photo_url || null
+        }
+
+        console.log('Telegram user data:', MiniApp.initDataUnsafe.user)
+        console.log('API URL:', 'https://hack.1ge.kz')
+        console.log('Отправляем данные на сервер:', userData)
+
+        const response = await fetch('https://hack.1ge.kz/api/users/auth/telegram/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Origin': 'https://hack.1ge.kz'
+            },
+            body: JSON.stringify(userData)
+        })
+
+        console.log('Response status:', response.status)
+        console.log('Response headers:', Object.fromEntries(response.headers))
+
+        if (!response.ok) {
+            const errorText = await response.text()
+            console.error('Error response:', errorText)
+            throw new Error(`Ошибка аутентификации: ${response.status}. ${errorText}`)
+        }
+
+        const data = await response.json()
+        console.log('Ответ сервера:', data)
+        
+        // Сохраняем данные пользователя
+        localStorage.setItem('user', JSON.stringify(data.user))
+        
+        return data
+    } catch (error) {
+        console.error('Ошибка при аутентификации:', error)
+        throw error
+    }
+}
+
 onMounted(async () => {
-    if (MiniApp.initDataUnsafe?.user?.username) {
-        username.value = MiniApp.initDataUnsafe.user.username
+    try {
+        // Пытаемся аутентифицировать пользователя при загрузке
+        await authenticateWithTelegram()
+    } catch (error) {
+        console.error('Ошибка при автоматической аутентификации:', error)
     }
 
     await Promise.all([
@@ -73,16 +127,16 @@ const fetchData = async (endpoint, cacheKey, timestampKey, loadingKey, errorKey,
     error.value[errorKey] = null
 
     try {
-        const apiUrl = `${API_URL}/api/${endpoint}`
+        const apiUrl = `https://hack.1ge.kz/api/${endpoint}`
         console.log(`Fetching from: ${apiUrl}`)
         
         const response = await fetch(apiUrl, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include'
+                'Content-Type': 'application/json',
+                'Origin': 'https://hack.1ge.kz'
+            }
         })
         
         if (!response.ok) {
