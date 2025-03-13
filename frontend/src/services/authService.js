@@ -22,8 +22,16 @@ class AuthService {
 
     async getUserProfile() {
         try {
+            const telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
+            if (!telegramUser) {
+                throw new Error('Не удалось получить данные пользователя Telegram');
+            }
+            
             const response = await axios.get(`${API_URL}/api/users/profile/`, {
-                credentials: 'include'
+                params: {
+                    telegram_id: telegramUser.id
+                },
+                withCredentials: true
             });
             return response.data;
         } catch (error) {

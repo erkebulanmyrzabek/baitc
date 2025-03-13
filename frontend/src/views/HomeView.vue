@@ -277,13 +277,14 @@ const unregisterFromHackathon = async (hackathonId) => {
 
 const fetchUserProfile = async (telegram_id) => {
     try {
-        const response = await fetch(`https://hack.1ge.kz/api/users/users/profile/?telegram_id=${telegram_id}`, {
+        const response = await fetch(`${API_URL}/api/users/profile/?telegram_id=${telegram_id}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Origin': 'https://hack.1ge.kz'
-            }
+                'Origin': window.location.origin
+            },
+            credentials: 'include'
         });
 
         if (!response.ok) {
@@ -300,13 +301,14 @@ const fetchUserProfile = async (telegram_id) => {
 
 const updateUserProfile = async (telegram_id, profileData) => {
     try {
-        const response = await fetch(`https://hack.1ge.kz/api/users/users/profile/?telegram_id=${telegram_id}`, {
+        const response = await fetch(`${API_URL}/api/users/profile/?telegram_id=${telegram_id}`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Origin': 'https://hack.1ge.kz'
+                'Origin': window.location.origin
             },
+            credentials: 'include',
             body: JSON.stringify(profileData)
         });
 
