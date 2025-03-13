@@ -44,6 +44,14 @@ const router = createRouter({
       path: '/settings',
       name: 'settings',
       component: ProfileSettingsView
+    },
+    {
+      path: '/hackathons/:id',
+      name: 'HackathonDetail',
+      component: () => import('@/views/HackathonDetailView.vue'),
+      meta: {
+        requiresAuth: false
+      }
     }
   ]
 })

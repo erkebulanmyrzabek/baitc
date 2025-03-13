@@ -1,10 +1,31 @@
-import axios from 'axios';
+import axiosInstance from './axiosConfig';
 
-const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:8000/api';
+// Тестовые данные для разработки
+const TEST_USER = {
+    id: '123456789',
+    first_name: 'Тестовый',
+    last_name: 'Пользователь',
+    username: 'test_user',
+    photo_url: 'https://via.placeholder.com/100'
+};
 
 class AuthService {
     constructor() {
-        this.telegram = window.Telegram.WebApp;
+        // В режиме разработки используем тестовые данные
+        if (import.meta.env.DEV) {
+            this.telegram = {
+                initData: 'test_init_data',
+                initDataUnsafe: {
+                    user: TEST_USER
+                }
+            };
+            console.info('Используется тестовый пользователь:', TEST_USER);
+        } else if (window.Telegram && window.Telegram.WebApp) {
+            this.telegram = window.Telegram.WebApp;
+        } else {
+            console.warn('Telegram WebApp не доступен. Приложение запущено вне Telegram.');
+            this.telegram = null;
+        }
     }
 
     async authenticate() {
@@ -25,17 +46,23 @@ class AuthService {
                 }
             }
 
-            // Если токена нет или он невалиден, выполняем аутентификацию
-            const initData = this.telegram.initData;
+            // В режиме разработки всегда используем тестовые данные
+            const initData = import.meta.env.DEV ? 'test_init_data' : this.telegram?.initData;
+            const user = import.meta.env.DEV ? TEST_USER : this.telegram?.initDataUnsafe?.user;
+
+            if (!user) {
+                throw new Error('Приложение должно быть запущено в Telegram');
+            }
+
             const userData = {
-                telegram_id: this.telegram.initDataUnsafe.user.id.toString(),
-                first_name: this.telegram.initDataUnsafe.user.first_name,
-                last_name: this.telegram.initDataUnsafe.user.last_name,
-                username: this.telegram.initDataUnsafe.user.username,
-                photo_url: this.telegram.initDataUnsafe.user.photo_url,
+                telegram_id: user.id.toString(),
+                first_name: user.first_name || '',
+                last_name: user.last_name || '',
+                username: user.username || null,
+                photo_url: user.photo_url || null,
             };
 
-            const response = await axios.post(`${API_URL}/auth/telegram/`, userData, {
+            const response = await axiosInstance.post('/auth/telegram/', userData, {
                 headers: {
                     'X-Telegram-Init-Data': initData
                 }
@@ -50,12 +77,12 @@ class AuthService {
             return false;
         } catch (error) {
             console.error('Authentication error:', error);
-            return false;
+            throw error;
         }
     }
 
     async checkToken(token) {
-        return await axios.get(`${API_URL}/auth/check/`, {
+        return await axiosInstance.get('/auth/check/', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -69,7 +96,7 @@ class AuthService {
                 throw new Error('No refresh token available');
             }
 
-            const response = await axios.post(`${API_URL}/auth/refresh/`, {
+            const response = await axiosInstance.post('/auth/refresh/', {
                 refresh: refresh_token
             });
 
@@ -101,4 +128,6 @@ class AuthService {
     isAuthenticated() {
         return !!this.getToken();
     }
-} 
+}
+
+export default AuthService; 

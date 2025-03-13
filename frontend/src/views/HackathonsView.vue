@@ -11,17 +11,30 @@
       </div>
     </div>
 
-    <div class="hackathons-grid">
+    <div v-if="loading" class="loading">
+      Загрузка хакатонов...
+    </div>
+
+    <div v-else-if="error" class="error">
+      {{ error }}
+      <button @click="fetchHackathons" class="retry-button">Попробовать снова</button>
+    </div>
+
+    <div v-else class="hackathons-grid">
       <div v-for="hackathon in filteredHackathons" :key="hackathon.id" class="hackathon-card">
         <div class="hackathon-image">
-          <img :src="hackathon.image_url || '/default-hackathon.jpg'" :alt="hackathon.name">
+          <img 
+            :src="hackathon.image"
+            :alt="hackathon.name"
+            @error="handleImageError"
+          >
           <div class="date-badge">
             {{ formatDate(hackathon.start_date) }}
           </div>
         </div>
         <div class="hackathon-content">
           <h3>{{ hackathon.name }}</h3>
-          <p class="description">{{ hackathon.description }}</p>
+          <p class="description">{{ hackathon.short_description }}</p>
           <div class="hackathon-details">
             <div class="detail">
               <span class="label">Дедлайн регистрации:</span>
@@ -31,8 +44,26 @@
               <span class="label">Период проведения:</span>
               <span class="value">{{ formatDate(hackathon.start_date) }} - {{ formatDate(hackathon.end_date) }}</span>
             </div>
+            <div class="detail">
+              <span class="label">Участники:</span>
+              <span class="value">{{ hackathon.participants_count }}/{{ hackathon.max_participants }}</span>
+            </div>
           </div>
-          <button class="register-button">Зарегистрироваться</button>
+          <div class="button-group">
+            <button 
+              @click="handleRegistration(hackathon)" 
+              :class="['register-button', { 'registered': hackathon.is_registered }]"
+              :disabled="!hackathon.can_register && !hackathon.is_registered"
+            >
+              {{ getButtonText(hackathon) }}
+            </button>
+            <button 
+              @click="router.push(`/hackathons/${hackathon.id}`)" 
+              class="details-button"
+            >
+              Подробнее
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -41,7 +72,9 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import { hackathonService } from '@/services/hackathonService'
+import { useAuth } from '@/composables/useAuth'
+import { useRouter } from 'vue-router'
 
 export default {
   setup() {
@@ -50,30 +83,63 @@ export default {
     const sortBy = ref('date')
     const loading = ref(false)
     const error = ref(null)
-
-    const API_URL = import.meta.env.VITE_API_URL
+    const { isAuthenticated } = useAuth()
+    const router = useRouter()
 
     const fetchHackathons = async () => {
       loading.value = true
+      error.value = null
       try {
-        const response = await axios.get(`${API_URL}/api/hackathons/`)
-        hackathons.value = response.data
+        const data = await hackathonService.getAllHackathons()
+        hackathons.value = data.results || data // Поддержка пагинации
       } catch (err) {
         error.value = 'Ошибка при загрузке хакатонов'
-        console.error(err)
+        console.error('Ошибка при загрузке хакатонов:', err)
       } finally {
         loading.value = false
       }
     }
 
+    const handleRegistration = async (hackathon) => {
+      if (!isAuthenticated.value) {
+        error.value = 'Необходимо авторизоваться для регистрации'
+        return
+      }
+
+      try {
+        if (hackathon.is_registered) {
+          await hackathonService.unregisterFromHackathon(hackathon.id)
+          hackathon.is_registered = false
+          hackathon.participants_count--
+        } else {
+          await hackathonService.registerForHackathon(hackathon.id)
+          hackathon.is_registered = true
+          hackathon.participants_count++
+        }
+      } catch (err) {
+        error.value = err.response?.data?.error || 'Ошибка при регистрации'
+        console.error('Ошибка при регистрации:', err)
+      }
+    }
+
+    const getButtonText = (hackathon) => {
+      if (hackathon.is_registered) {
+        return 'Отменить регистрацию'
+      }
+      if (!hackathon.can_register) {
+        return 'Регистрация закрыта'
+      }
+      return 'Зарегистрироваться'
+    }
+
     const filteredHackathons = computed(() => {
       let result = [...hackathons.value]
       
-      
       if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase()
         result = result.filter(h => 
-          h.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-          h.description.toLowerCase().includes(searchQuery.value.toLowerCase())
+          h.name.toLowerCase().includes(query) ||
+          h.short_description.toLowerCase().includes(query)
         )
       }
 
@@ -87,7 +153,16 @@ export default {
     })
 
     const formatDate = (dateString) => {
-      return new Date(dateString).toLocaleDateString('ru-RU')
+      return new Date(dateString).toLocaleDateString('ru-RU', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    }
+
+    const handleImageError = (event) => {
+      // Если изображение не загрузилось, заменяем его на изображение по умолчанию
+      // TODO: Добавить изображение по умолчанию
     }
 
     onMounted(fetchHackathons)
@@ -99,7 +174,11 @@ export default {
       loading,
       error,
       filteredHackathons,
-      formatDate
+      formatDate,
+      handleRegistration,
+      getButtonText,
+      handleImageError,
+      router
     }
   }
 }
@@ -137,6 +216,27 @@ export default {
   flex: 1;
 }
 
+.loading, .error {
+  text-align: center;
+  padding: 20px;
+  font-size: 1.2em;
+  color: #666;
+}
+
+.error {
+  color: #dc3545;
+}
+
+.retry-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 .hackathons-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -148,6 +248,7 @@ export default {
   border-radius: 12px;
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
+  background: white;
 }
 
 .hackathon-card:hover {
@@ -191,7 +292,6 @@ export default {
   color: #666;
   margin-bottom: 15px;
   display: -webkit-box;
-  line-clamp: 3;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -216,19 +316,40 @@ export default {
   font-weight: 500;
 }
 
-.register-button {
-  width: 100%;
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.register-button, .details-button {
+  flex: 1;
   padding: 10px;
-  background-color: #42b983;
-  color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
-.register-button:hover {
-  background-color: #3aa876;
+.details-button {
+  background-color: #2c3e50;
+  color: white;
+}
+
+.details-button:hover {
+  background-color: #34495e;
+}
+
+.register-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.register-button.registered {
+  background-color: #dc3545;
+}
+
+.register-button.registered:hover {
+  background-color: #c82333;
 }
 
 @media (max-width: 768px) {

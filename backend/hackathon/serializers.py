@@ -12,6 +12,7 @@ class HackathonSerializer(serializers.ModelSerializer):
     participants_count = serializers.SerializerMethodField()
     is_registered = serializers.SerializerMethodField()
     can_register = serializers.SerializerMethodField()
+    image = serializers.URLField(allow_blank=True, required=False)
 
     class Meta:
         model = Hackathon
@@ -25,24 +26,33 @@ class HackathonSerializer(serializers.ModelSerializer):
         read_only_fields = ['participants_count', 'is_registered', 'can_register', 'created_at', 'updated_at']
 
     def get_participants_count(self, obj):
-        return obj.participants.count()
+        try:
+            return obj.participants.count()
+        except Exception as e:
+            return 0
 
     def get_is_registered(self, obj):
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return obj.participants.filter(id=request.user.id).exists()
-        return False
+        try:
+            request = self.context.get('request')
+            if request and hasattr(request, 'user') and request.user.is_authenticated:
+                return obj.participants.filter(id=request.user.id).exists()
+            return False
+        except Exception as e:
+            return False
 
     def get_can_register(self, obj):
-        now = timezone.now()
-        if obj.registration_deadline < now:
+        try:
+            now = timezone.now()
+            if obj.registration_deadline < now:
+                return False
+            if obj.participants.count() >= obj.max_participants:
+                return False
+            request = self.context.get('request')
+            if request and hasattr(request, 'user') and request.user.is_authenticated:
+                return not obj.participants.filter(id=request.user.id).exists()
+            return True
+        except Exception as e:
             return False
-        if obj.participants.count() >= obj.max_participants:
-            return False
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return not obj.participants.filter(id=request.user.id).exists()
-        return True
 
     def validate(self, data):
         if 'start_date' in data and 'end_date' in data:
@@ -61,5 +71,6 @@ class HackathonSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 "max_participants": "Максимальное количество участников должно быть больше 0"
             })
+
 
         return data

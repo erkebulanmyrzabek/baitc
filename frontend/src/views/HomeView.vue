@@ -3,7 +3,67 @@ import Navbar from '../components/Navbar.vue'
 import { ref, onMounted } from 'vue'
 import { useMiniApp } from 'vue-tg'
 import { RouterLink } from 'vue-router'
+import axiosInstance from '../services/axiosConfig'
 
+const loading = ref({
+  hackathons: false
+})
+const error = ref({
+  hackathons: null
+})
+const hackathons = ref([])
+
+const refreshHackathons = async () => {
+  loading.value.hackathons = true
+  error.value.hackathons = null
+  
+  try {
+    const response = await axiosInstance.get('/hackathons/')
+    hackathons.value = response.data
+  } catch (err) {
+    console.error('Error fetching hackathons:', err)
+    error.value.hackathons = 'Ошибка при загрузке хакатонов'
+  } finally {
+    loading.value.hackathons = false
+  }
+}
+
+const registerForHackathon = async (hackathonId) => {
+  try {
+    await axiosInstance.post(`/hackathons/${hackathonId}/register/`)
+    await refreshHackathons()
+  } catch (err) {
+    console.error('Error registering for hackathon:', err)
+  }
+}
+
+const unregisterFromHackathon = async (hackathonId) => {
+  try {
+    await axiosInstance.post(`/hackathons/${hackathonId}/unregister/`)
+    await refreshHackathons()
+  } catch (err) {
+    console.error('Error unregistering from hackathon:', err)
+  }
+}
+
+const getRegistrationStatus = (hackathon) => {
+  if (hackathon.is_finished) return 'Хакатон завершен'
+  if (hackathon.participants_count >= hackathon.max_participants) return 'Нет мест'
+  if (!hackathon.registration_open) return 'Регистрация закрыта'
+  return 'Регистрация открыта'
+}
+
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString('ru-RU', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+onMounted(() => {
+  refreshHackathons()
+})
 </script>
 
 <template>

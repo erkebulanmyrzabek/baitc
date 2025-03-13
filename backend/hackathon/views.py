@@ -18,6 +18,7 @@ def changes(request):
 
 
 class HackathonViewSet(viewsets.ModelViewSet):
+    queryset = Hackathon.objects.prefetch_related('participants', 'tags').all()
     serializer_class = HackathonSerializer
     search_fields = ['name', 'short_description', 'full_description', 'requirements', 'location']
     ordering_fields = ['start_date', 'created_at', 'name']
@@ -43,6 +44,11 @@ class HackathonViewSet(viewsets.ModelViewSet):
             logger.error(f"Error in get_queryset: {str(e)}")
             return Hackathon.objects.none()
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
     def list(self, request, *args, **kwargs):
         try:
             logger.info("Attempting to fetch hackathons list")
@@ -50,11 +56,19 @@ class HackathonViewSet(viewsets.ModelViewSet):
             page = self.paginate_queryset(queryset)
             
             if page is not None:
-                serializer = self.get_serializer(page, many=True)
+                serializer = self.get_serializer(
+                    page,
+                    many=True,
+                    context=self.get_serializer_context()
+                )
                 logger.info(f"Successfully retrieved {len(page)} hackathons")
                 return self.get_paginated_response(serializer.data)
 
-            serializer = self.get_serializer(queryset, many=True)
+            serializer = self.get_serializer(
+                queryset,
+                many=True,
+                context=self.get_serializer_context()
+            )
             logger.info(f"Successfully retrieved {len(queryset)} hackathons")
             return Response(serializer.data)
         except Exception as e:

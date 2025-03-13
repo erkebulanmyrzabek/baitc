@@ -1,17 +1,28 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
 from .serializers import TelegramAuthSerializer, UserProfileSerializer
 from django.conf import settings
 import hashlib
 import hmac
 import json
 from urllib.parse import parse_qs
+import logging
+
+logger = logging.getLogger(__name__)
 
 class TelegramAuthView(APIView):
+    permission_classes = [AllowAny]
+
     def verify_telegram_data(self, init_data):
         """Проверяет подлинность данных от Telegram"""
+        # В режиме разработки пропускаем проверку
+        if settings.DEBUG and init_data == 'test_init_data':
+            return True
+
         try:
             # Разбираем init_data
             data_dict = dict(parse_qs(init_data))
@@ -76,3 +87,40 @@ class TelegramAuthView(APIView):
             serializer.errors, 
             status=status.HTTP_400_BAD_REQUEST
         )
+
+class TokenCheckView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user = request.user
+            if not hasattr(user, 'telegram_id'):
+                return Response(
+                    {"error": "Invalid user object"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            serializer = UserProfileSerializer(user)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error in TokenCheckView: {str(e)}")
+            return Response(
+                {"error": "Ошибка при проверке токена"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class CustomTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        try:
+            response = super().post(request, *args, **kwargs)
+            if response.status_code == 200 and hasattr(request, 'user'):
+                user = request.user
+                if hasattr(user, 'telegram_id'):
+                    serializer = UserProfileSerializer(user)
+                    response.data['user'] = serializer.data
+            return response
+        except Exception as e:
+            logger.error(f"Error in CustomTokenRefreshView: {str(e)}")
+            return Response(
+                {"error": "Ошибка при обновлении токена"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

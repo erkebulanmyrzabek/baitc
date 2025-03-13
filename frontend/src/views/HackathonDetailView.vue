@@ -1,232 +1,366 @@
 <template>
-  <div class="space-y-6">
-    <!-- Хлебные крошки -->
-    <nav class="flex" aria-label="Breadcrumb">
-      <ol class="inline-flex items-center space-x-1 md:space-x-3">
-        <li class="inline-flex items-center">
-          <RouterLink to="/hackathons" 
-                      class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
-            </svg>
-            Хакатоны
-          </RouterLink>
-        </li>
-        <li aria-current="page">
-          <div class="flex items-center">
-            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-            </svg>
-            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">{{ hackathon.name }}</span>
-          </div>
-        </li>
-      </ol>
-    </nav>
-
-    <!-- Основная информация -->
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-      <!-- Изображение хакатона -->
-      <div class="aspect-video w-full">
-        <img v-if="hackathon.image" 
-             :src="hackathon.image" 
-             :alt="hackathon.name" 
-             class="w-full h-full object-cover">
-        <div v-else class="w-full h-full bg-gray-200 flex items-center justify-center">
-          <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-          </svg>
-        </div>
-      </div>
-
-      <!-- Контент -->
-      <div class="p-6">
-        <!-- Заголовок и статус -->
-        <div class="flex items-start justify-between mb-4">
-          <h1 class="text-2xl font-bold text-gray-900">{{ hackathon.name }}</h1>
-          <div>
-            <span v-if="hackathon.is_registration_open" class="px-3 py-1 text-sm bg-green-500 text-white rounded-full">
-              Регистрация открыта
-            </span>
-            <span v-else-if="hackathon.is_active" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-full">
-              Проходит
-            </span>
-            <span v-else-if="hackathon.is_finished" class="px-3 py-1 text-sm bg-gray-500 text-white rounded-full">
-              Завершен
-            </span>
-            <span v-else class="px-3 py-1 text-sm bg-yellow-500 text-white rounded-full">
-              Скоро
-            </span>
-          </div>
-        </div>
-
-        <!-- Основная информация -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div class="space-y-4">
-            <div>
-              <h3 class="text-sm font-medium text-gray-500">📅 Регистрация</h3>
-              <p class="mt-1 text-sm text-gray-900">
-                {{ formatDate(hackathon.start_registration) }} - {{ formatDate(hackathon.end_registration) }}
-              </p>
-            </div>
-            <div>
-              <h3 class="text-sm font-medium text-gray-500">🎯 Проведение</h3>
-              <p class="mt-1 text-sm text-gray-900">
-                {{ formatDate(hackathon.start_hackathon) }} - {{ formatDate(hackathon.end_hackathon) }}
-              </p>
-            </div>
-            <div v-if="hackathon.prize_pool">
-              <h3 class="text-sm font-medium text-gray-500">💰 Призовой фонд</h3>
-              <p class="mt-1 text-xl font-bold text-gray-900">{{ hackathon.prize_pool }} ₸</p>
-              
-              <!-- Призовые места -->
-              <div class="mt-3 space-y-2">
-                <div v-for="prize in hackathon.prize_places" 
-                     :key="prize.place"
-                     class="flex items-center justify-between bg-gray-50 rounded-lg p-2">
-                  <div class="flex items-center">
-                    <span v-if="prize.place === 1" class="text-2xl mr-2">🥇</span>
-                    <span v-else-if="prize.place === 2" class="text-2xl mr-2">🥈</span>
-                    <span v-else-if="prize.place === 3" class="text-2xl mr-2">🥉</span>
-                    <span v-else class="text-2xl mr-2">🏅</span>
-                    <span class="text-sm font-medium">{{ prize.place }} место</span>
-                  </div>
-                  <span class="text-sm font-bold text-gray-900">{{ prize.prize_amount }} ₸</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="space-y-4">
-            <div>
-              <h3 class="text-sm font-medium text-gray-500">👥 Участники</h3>
-              <p class="mt-1 text-sm text-gray-900">{{ hackathon.participants_count }} человек</p>
-            </div>
-            <div>
-              <h3 class="text-sm font-medium text-gray-500">🏆 Количество победителей</h3>
-              <p class="mt-1 text-sm text-gray-900">{{ hackathon.number_of_winners }}</p>
-            </div>
-            <div>
-              <h3 class="text-sm font-medium text-gray-500">🌐 Формат проведения</h3>
-              <p class="mt-1 text-sm text-gray-900">
-                {{ getFormatLabel(hackathon.type) }}
-              </p>
-            </div>
-            <div v-if="hackathon.tags?.length">
-              <h3 class="text-sm font-medium text-gray-500">🏷️ Теги</h3>
-              <div class="mt-1 flex flex-wrap gap-2">
-                <span v-for="tag in hackathon.tags" 
-                      :key="tag.id"
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {{ tag.name }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Описание -->
-        <div class="prose max-w-none">
-          <h3 class="text-sm font-medium text-gray-500 mb-2">📝 Описание</h3>
-          <div v-html="formattedDescription"></div>
-        </div>
-
-        <!-- Кнопки действий -->
-        <div class="mt-6 flex flex-col sm:flex-row gap-4">
-          <button v-if="hackathon.is_registration_open" 
-                  @click="register"
-                  class="btn-primary flex-1">
-            Зарегистрироваться
-          </button>
-          <RouterLink to="/hackathons" 
-                      class="btn-secondary flex-1 text-center">
-            Вернуться к списку
-          </RouterLink>
-        </div>
-      </div>
+  <div class="hackathon-detail">
+    <div v-if="loading" class="loading">
+      Загрузка информации о хакатоне...
     </div>
 
-    <!-- Результаты -->
-    <div v-if="hackathon.is_active || hackathon.is_finished" 
-         class="bg-white rounded-xl shadow-sm p-6">
-      <h2 class="text-lg font-semibold text-gray-900 mb-4">Результаты</h2>
-      <div v-if="hackathon.winners?.length" class="space-y-4">
-        <div v-for="winner in hackathon.winners" 
-             :key="winner.id"
-             class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <span v-if="winner.place === 1" class="text-2xl">🥇</span>
-              <span v-else-if="winner.place === 2" class="text-2xl">🥈</span>
-              <span v-else-if="winner.place === 3" class="text-2xl">🥉</span>
+    <div v-else-if="error" class="error">
+      {{ error }}
+      <button @click="fetchHackathon" class="retry-button">Попробовать снова</button>
+    </div>
+
+    <div v-else-if="hackathon" class="hackathon-content">
+      <div class="header">
+        <button @click="router.back()" class="back-button">
+          ← Назад
+        </button>
+        <h1>{{ hackathon.name }}</h1>
+      </div>
+
+      <div class="main-info">
+        <div class="image-container">
+          <img 
+            :src="hackathon.image || 'https://via.placeholder.com/800x400?text=Hackathon'" 
+            :alt="hackathon.name"
+            @error="handleImageError"
+          >
+        </div>
+
+        <div class="info-panel">
+          <div class="status-card">
+            <div class="status-item">
+              <span class="label">Статус регистрации:</span>
+              <span :class="['value', { 'closed': !hackathon.can_register }]">
+                {{ hackathon.can_register ? 'Открыта' : 'Закрыта' }}
+              </span>
             </div>
-            <div class="ml-4">
-              <div class="text-sm font-medium text-gray-900">{{ winner.team_name }}</div>
-              <div class="text-sm text-gray-500">{{ winner.project_name }}</div>
+            <div class="status-item">
+              <span class="label">Участники:</span>
+              <span class="value">{{ hackathon.participants_count }}/{{ hackathon.max_participants }}</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Дедлайн регистрации:</span>
+              <span class="value">{{ formatDate(hackathon.registration_deadline) }}</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Период проведения:</span>
+              <span class="value">{{ formatDate(hackathon.start_date) }} - {{ formatDate(hackathon.end_date) }}</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Призовой фонд:</span>
+              <span class="value">{{ hackathon.prize_pool }}</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Формат:</span>
+              <span class="value">{{ hackathon.is_online ? 'Онлайн' : 'Офлайн' }}</span>
+            </div>
+            <div v-if="!hackathon.is_online" class="status-item">
+              <span class="label">Место проведения:</span>
+              <span class="value">{{ hackathon.location }}</span>
             </div>
           </div>
-          <div class="text-sm text-gray-500">
-            {{ winner.prize }}
-          </div>
+
+          <button 
+            @click="handleRegistration" 
+            :class="['register-button', { 'registered': hackathon.is_registered }]"
+            :disabled="!hackathon.can_register && !hackathon.is_registered"
+          >
+            {{ getButtonText() }}
+          </button>
         </div>
       </div>
-      <p v-else class="text-gray-500">Результаты пока не объявлены</p>
+
+      <div class="description-section">
+        <h2>Описание</h2>
+        <div class="description" v-html="formatDescription(hackathon.full_description)"></div>
+      </div>
+
+      <div class="requirements-section">
+        <h2>Требования к участникам</h2>
+        <div class="requirements" v-html="formatDescription(hackathon.requirements)"></div>
+      </div>
+
+      <div class="tags-section" v-if="hackathon.tags && hackathon.tags.length">
+        <h2>Теги</h2>
+        <div class="tags">
+          <span v-for="tag in hackathon.tags" :key="tag.id" class="tag">
+            {{ tag.name }}
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
-import axios from 'axios'
+<script>
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { hackathonService } from '@/services/hackathonService'
+import { useAuth } from '@/composables/useAuth'
 
-const route = useRoute()
-const hackathon = ref({})
+export default {
+  setup() {
+    const route = useRoute()
+    const router = useRouter()
+    const { isAuthenticated } = useAuth()
+    
+    const hackathon = ref(null)
+    const loading = ref(true)
+    const error = ref(null)
 
-const formattedDescription = computed(() => {
-  return hackathon.value.description?.replace(/\n/g, '<br>') || ''
-})
+    const fetchHackathon = async () => {
+      loading.value = true
+      error.value = null
+      try {
+        const data = await hackathonService.getHackathon(route.params.id)
+        hackathon.value = data
+      } catch (err) {
+        error.value = 'Ошибка при загрузке информации о хакатоне'
+        console.error('Ошибка при загрузке хакатона:', err)
+      } finally {
+        loading.value = false
+      }
+    }
 
-const getFormatLabel = (type) => {
-  const labels = {
-    online: 'Онлайн',
-    offline: 'Офлайн',
-    hybrid: 'Гибридный'
+    const handleRegistration = async () => {
+      if (!isAuthenticated.value) {
+        error.value = 'Необходимо авторизоваться для регистрации'
+        return
+      }
+
+      try {
+        if (hackathon.value.is_registered) {
+          await hackathonService.unregisterFromHackathon(hackathon.value.id)
+          hackathon.value.is_registered = false
+          hackathon.value.participants_count--
+        } else {
+          await hackathonService.registerForHackathon(hackathon.value.id)
+          hackathon.value.is_registered = true
+          hackathon.value.participants_count++
+        }
+      } catch (err) {
+        error.value = err.response?.data?.error || 'Ошибка при регистрации'
+        console.error('Ошибка при регистрации:', err)
+      }
+    }
+
+    const getButtonText = () => {
+      if (!hackathon.value) return ''
+      if (hackathon.value.is_registered) {
+        return 'Отменить регистрацию'
+      }
+      if (!hackathon.value.can_register) {
+        return 'Регистрация закрыта'
+      }
+      return 'Зарегистрироваться'
+    }
+
+    const formatDate = (dateString) => {
+      return new Date(dateString).toLocaleDateString('ru-RU', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    }
+
+    const formatDescription = (text) => {
+      if (!text) return ''
+      return text.replace(/\n/g, '<br>')
+    }
+
+    const handleImageError = (event) => {
+      event.target.src = 'https://via.placeholder.com/800x400?text=Hackathon'
+    }
+
+    onMounted(fetchHackathon)
+
+    return {
+      hackathon,
+      loading,
+      error,
+      router,
+      handleRegistration,
+      getButtonText,
+      formatDate,
+      formatDescription,
+      handleImageError
+    }
   }
-  return labels[type] || type
 }
-
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  return new Intl.DateTimeFormat('ru-RU', {
-    day: 'numeric',
-    month: 'numeric',
-    year: 'numeric'
-  }).format(date)
-}
-
-const register = async () => {
-  try {
-    await axios.post(`/api/hackathons/${hackathon.value.id}/register/`)
-    // Обработка успешной регистрации
-  } catch (error) {
-    console.error('Error registering for hackathon:', error)
-  }
-}
-
-const fetchHackathon = async () => {
-  try {
-    const response = await axios.get(`/api/hackathons/${route.params.id}/`)
-    hackathon.value = response.data
-  } catch (error) {
-    console.error('Error fetching hackathon:', error)
-  }
-}
-
-onMounted(() => {
-  fetchHackathon()
-})
 </script>
 
 <style scoped>
+.hackathon-detail {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
 
+.loading, .error {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2em;
+  color: #666;
+}
+
+.error {
+  color: #dc3545;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.back-button {
+  padding: 10px 20px;
+  background: none;
+  border: 1px solid #2c3e50;
+  border-radius: 8px;
+  color: #2c3e50;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-button:hover {
+  background: #2c3e50;
+  color: white;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2.5em;
+  color: #2c3e50;
+}
+
+.main-info {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.image-container {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.image-container img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+}
+
+.info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.status-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.status-item {
+  margin-bottom: 15px;
+}
+
+.status-item:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  display: block;
+  color: #666;
+  font-size: 0.9em;
+  margin-bottom: 5px;
+}
+
+.value {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.value.closed {
+  color: #dc3545;
+}
+
+.register-button {
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  background-color: #42b983;
+  color: white;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.register-button:hover:not(:disabled) {
+  background-color: #3aa876;
+}
+
+.register-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.register-button.registered {
+  background-color: #dc3545;
+}
+
+.register-button.registered:hover {
+  background-color: #c82333;
+}
+
+.description-section,
+.requirements-section,
+.tags-section {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h2 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-size: 1.8em;
+}
+
+.description,
+.requirements {
+  line-height: 1.6;
+  color: #2c3e50;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag {
+  padding: 5px 15px;
+  background-color: #e9ecef;
+  border-radius: 20px;
+  color: #2c3e50;
+  font-size: 0.9em;
+}
+
+@media (max-width: 768px) {
+  .main-info {
+    grid-template-columns: 1fr;
+  }
+
+  .image-container img {
+    height: 300px;
+  }
+}
 </style> 

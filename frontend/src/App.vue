@@ -12,32 +12,50 @@
 
         <router-view v-else />
     </div>
+    <Navbar />
 </template>
 
 <script setup>
 import { onMounted } from 'vue';
-import { useAuth } from './composables/useAuth';
+import { provideAuth } from './composables/useAuth';
 import { useRouter } from 'vue-router';
-import AuthService from './services/authService'
+import AuthService from './services/authService';
+import { setupInterceptors } from './services/setupInterceptors';
+import Navbar from './components/Navbar.vue';
 
-const { loading, error, initializeAuth } = useAuth();
+const { loading, error, setLoading, setError, setUser } = provideAuth();
 const router = useRouter();
+const authService = new AuthService();
 
-const authService = new AuthService()
+// Настраиваем интерцепторы
+setupInterceptors(authService);
 
-const retryAuth = () => {
-    initializeAuth();
+const retryAuth = async () => {
+    setError(null);
+    setLoading(true);
+    
+    try {
+        const isAuthenticated = await authService.authenticate();
+        if (!isAuthenticated) {
+            setError('Ошибка аутентификации. Пожалуйста, попробуйте снова.');
+        } else {
+            const user = authService.getUser();
+            setUser(user);
+        }
+    } catch (error) {
+        console.error('Error during authentication:', error);
+        if (error.message === 'Приложение должно быть запущено в Telegram') {
+            setError('Это приложение должно быть открыто через Telegram.');
+        } else {
+            setError('Произошла ошибка при аутентификации. Пожалуйста, попробуйте снова.');
+        }
+    } finally {
+        setLoading(false);
+    }
 };
 
 onMounted(async () => {
-    try {
-        const isAuthenticated = await authService.authenticate()
-        if (!isAuthenticated) {
-            console.error('Authentication failed')
-        }
-    } catch (error) {
-        console.error('Error during authentication:', error)
-    }
+    await retryAuth();
 });
 </script>
 
