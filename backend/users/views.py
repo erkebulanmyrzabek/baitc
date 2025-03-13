@@ -1,180 +1,78 @@
-from django.shortcuts import render
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.contrib.auth import login
-from django.db import transaction
-from .models import UserProfile
-from .serializers import UserSerializer, TelegramAuthSerializer, UserProfileSerializer
-import logging
-
-logger = logging.getLogger(__name__)
-
-# Create your views here.
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def register_telegram_user(request):
-    telegram_id = request.data.get('telegram_id')
-    username = request.data.get('username')
-    first_name = request.data.get('first_name')
-    last_name = request.data.get('last_name')
-    photo_url = request.data.get('photo_url')
-
-    if not telegram_id:
-        return Response({'error': 'telegram_id is required'}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        # Проверяем существует ли пользователь с таким telegram_id
-        user = UserProfile.objects.filter(telegram_id=telegram_id).first()
-        
-        if not user:
-            # Создаем нового пользователя
-            user = UserProfile.objects.create(
-                name=f"{first_name or ''} {last_name or ''}".strip() or f"User_{telegram_id}",
-                telegram_id=telegram_id
-            )
-            
-            if photo_url:
-                user.avatar = photo_url
-            
-        # Обновляем данные пользователя если нужно
-        if photo_url and not user.avatar:
-            user.avatar = photo_url
-        user.save()
-
-        serializer = UserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import TelegramAuthSerializer, UserProfileSerializer
+from django.conf import settings
+import hashlib
+import hmac
+import json
+from urllib.parse import parse_qs
 
 class TelegramAuthView(APIView):
-    @transaction.atomic
-    def post(self, request):
-        serializer = TelegramAuthSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        telegram_data = serializer.validated_data
-        telegram_id = telegram_data['telegram_id']
-
+    def verify_telegram_data(self, init_data):
+        """Проверяет подлинность данных от Telegram"""
         try:
-            # Пытаемся найти существующего пользователя
-            user = UserProfile.objects.get(telegram_id=telegram_id)
-            # Обновляем данные пользователя
-            if 'username' in telegram_data and telegram_data['username']:
-                user.username = telegram_data['username']
-            if 'first_name' in telegram_data:
-                user.first_name = telegram_data['first_name']
-            if 'last_name' in telegram_data:
-                user.last_name = telegram_data['last_name']
-            if 'photo_url' in telegram_data:
-                user.photo_url = telegram_data['photo_url']
-            user.save()
+            # Разбираем init_data
+            data_dict = dict(parse_qs(init_data))
+            data_check_string = '\n'.join([
+                f"{k}={v[0]}" for k, v in sorted(data_dict.items()) 
+                if k != 'hash'
+            ])
             
-        except UserProfile.DoesNotExist:
-            # Создаем нового пользователя
-            user = UserProfile.objects.create(
-                telegram_id=telegram_id,
-                username=telegram_data.get('username', f'user_{telegram_id}'),
-                first_name=telegram_data.get('first_name', ''),
-                last_name=telegram_data.get('last_name', ''),
-                photo_url=telegram_data.get('photo_url'),
+            # Получаем хеш из данных
+            received_hash = data_dict.get('hash', [None])[0]
+            if not received_hash:
+                return False
+            
+            # Создаем secret key
+            secret_key = hmac.new(
+                'WebAppData'.encode(),
+                settings.BOT_TOKEN.encode(),
+                hashlib.sha256
+            ).digest()
+            
+            # Вычисляем хеш
+            calculated_hash = hmac.new(
+                secret_key,
+                data_check_string.encode(),
+                hashlib.sha256
+            ).hexdigest()
+            
+            return calculated_hash == received_hash
+        except Exception as e:
+            print(f"Error verifying Telegram data: {e}")
+            return False
+
+    def post(self, request):
+        # Получаем init_data из заголовка
+        init_data = request.headers.get('X-Telegram-Init-Data')
+        if not init_data or not self.verify_telegram_data(init_data):
+            return Response(
+                {'error': 'Invalid Telegram data'}, 
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Авторизуем пользователя
-        login(request, user)
-        
-        return Response({
-            'id': user.id,
-            'telegram_id': user.telegram_id,
-            'username': user.username,
-            'is_new': user.date_joined == user.last_login
-        })
-
-class UserProfileView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        serializer = UserProfileSerializer(request.user)
-        return Response(serializer.data)
-
-    def put(self, request):
-        serializer = UserProfileSerializer(request.user, data=request.data, partial=True)
+        serializer = TelegramAuthSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def telegram_auth(request):
-    logger.info(f"Получен запрос на аутентификацию: {request.data}")
-    
-    telegram_id = request.data.get('telegram_id')
-    if not telegram_id:
-        logger.error("telegram_id отсутствует в запросе")
-        return Response({'error': 'telegram_id is required'}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        user, created = UserProfile.objects.get_or_create(
-            telegram_id=telegram_id,
-            defaults={
-                'username': request.data.get('username', f'user_{telegram_id}'),
-                'first_name': request.data.get('first_name', ''),
-                'last_name': request.data.get('last_name', ''),
-                'photo_url': request.data.get('photo_url'),
+            user = serializer.save()
+            
+            # Создаем JWT токены
+            refresh = RefreshToken.for_user(user)
+            tokens = {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
             }
-        )
-
-        # Обновляем существующего пользователя
-        if not created and any(field in request.data for field in ['username', 'first_name', 'last_name', 'photo_url']):
-            user.username = request.data.get('username', user.username)
-            user.first_name = request.data.get('first_name', user.first_name)
-            user.last_name = request.data.get('last_name', user.last_name)
-            user.photo_url = request.data.get('photo_url', user.photo_url)
-            user.save()
-
-        logger.info(f"Пользователь {'создан' if created else 'обновлен'}: {user.telegram_id}")
-        
-        serializer = UserProfileSerializer(user)
-        response_data = {
-            'user': serializer.data,
-            'is_new': created
-        }
-        
-        return Response(response_data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
-        
-    except Exception as e:
-        logger.error(f"Ошибка при аутентификации пользователя: {str(e)}")
+            
+            # Добавляем данные пользователя в ответ
+            user_data = UserProfileSerializer(user).data
+            
+            return Response({
+                'status': 'success',
+                'tokens': tokens,
+                'user': user_data
+            })
         return Response(
-            {'error': f'Ошибка при аутентификации: {str(e)}'}, 
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            serializer.errors, 
+            status=status.HTTP_400_BAD_REQUEST
         )
-
-@api_view(['GET', 'PUT'])
-@permission_classes([AllowAny])
-def user_profile(request):
-    telegram_id = request.query_params.get('telegram_id')
-    if not telegram_id:
-        return Response({'error': 'telegram_id is required'}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        user = UserProfile.objects.get(telegram_id=telegram_id)
-    except UserProfile.DoesNotExist:
-        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
-        serializer = UserProfileSerializer(user)
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = UserProfileSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

@@ -18,16 +18,26 @@
 import { onMounted } from 'vue';
 import { useAuth } from './composables/useAuth';
 import { useRouter } from 'vue-router';
+import AuthService from './services/authService'
 
 const { loading, error, initializeAuth } = useAuth();
 const router = useRouter();
+
+const authService = new AuthService()
 
 const retryAuth = () => {
     initializeAuth();
 };
 
 onMounted(async () => {
-    await initializeAuth();
+    try {
+        const isAuthenticated = await authService.authenticate()
+        if (!isAuthenticated) {
+            console.error('Authentication failed')
+        }
+    } catch (error) {
+        console.error('Error during authentication:', error)
+    }
 });
 </script>
 
