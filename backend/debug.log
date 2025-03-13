@@ -413,3 +413,7 @@ INFO 2025-03-12 20:15:19,389 autoreload 16087 8346241088 /Users/erkebulanmyrzabe
 INFO 2025-03-12 20:15:19,653 autoreload 16164 8346241088 Watching for file changes with StatReloader
 INFO 2025-03-12 20:16:00,675 autoreload 16164 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/backend/settings.py changed, reloading.
 INFO 2025-03-12 20:16:01,007 autoreload 16328 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-13 08:52:43,065 autoreload 16328 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/asgiref/current_thread_executor.py changed, reloading.
+INFO 2025-03-13 08:52:43,498 autoreload 74045 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-13 08:52:48,767 autoreload 74045 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/asgiref/current_thread_executor.py changed, reloading.
+INFO 2025-03-13 08:52:49,013 autoreload 74077 8346241088 Watching for file changes with StatReloader

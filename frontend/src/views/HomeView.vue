@@ -46,7 +46,7 @@ const authenticateWithTelegram = async () => {
         }
 
         const userData = {
-            telegram_id: MiniApp.initDataUnsafe.user.id.toString(), // Важно преобразовать в строку
+            telegram_id: MiniApp.initDataUnsafe.user.id.toString(),
             username: MiniApp.initDataUnsafe.user.username || '',
             first_name: MiniApp.initDataUnsafe.user.first_name || '',
             last_name: MiniApp.initDataUnsafe.user.last_name || '',
@@ -81,6 +81,16 @@ const authenticateWithTelegram = async () => {
         
         // Сохраняем данные пользователя
         localStorage.setItem('user', JSON.stringify(data.user))
+        
+        // Если пользователь новый, получаем его профиль
+        if (data.is_new) {
+            try {
+                const profile = await fetchUserProfile(userData.telegram_id)
+                console.log('Получен профиль нового пользователя:', profile)
+            } catch (error) {
+                console.error('Ошибка при получении профиля:', error)
+            }
+        }
         
         return data
     } catch (error) {
@@ -255,6 +265,53 @@ const unregisterFromHackathon = async (hackathonId) => {
         // Здесь можно добавить отображение ошибки пользователю
     }
 }
+
+const fetchUserProfile = async (telegram_id) => {
+    try {
+        const response = await fetch(`https://hack.1ge.kz/api/users/users/profile/?telegram_id=${telegram_id}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Origin': 'https://hack.1ge.kz'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        throw error;
+    }
+};
+
+const updateUserProfile = async (telegram_id, profileData) => {
+    try {
+        const response = await fetch(`https://hack.1ge.kz/api/users/users/profile/?telegram_id=${telegram_id}`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Origin': 'https://hack.1ge.kz'
+            },
+            body: JSON.stringify(profileData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error updating user profile:', error);
+        throw error;
+    }
+};
 
 </script>
 
