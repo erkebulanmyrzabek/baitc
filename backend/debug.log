@@ -417,3 +417,16 @@ INFO 2025-03-13 08:52:43,065 autoreload 16328 8346241088 /Users/erkebulanmyrzabe
 INFO 2025-03-13 08:52:43,498 autoreload 74045 8346241088 Watching for file changes with StatReloader
 INFO 2025-03-13 08:52:48,767 autoreload 74045 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/venv/lib/python3.11/site-packages/asgiref/current_thread_executor.py changed, reloading.
 INFO 2025-03-13 08:52:49,013 autoreload 74077 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-13 09:17:00,708 autoreload 80201 8346241088 Watching for file changes with StatReloader
+WARNING 2025-03-13 09:17:02,722 log 80201 6203437056 Not Found: /
+INFO 2025-03-13 09:17:27,508 autoreload 80201 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/users/urls.py changed, reloading.
+INFO 2025-03-13 09:17:27,817 autoreload 80317 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-13 09:17:36,140 autoreload 80317 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/backend/settings.py changed, reloading.
+INFO 2025-03-13 09:17:36,452 autoreload 80361 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-13 09:17:50,547 views 80361 6201372672 Получен запрос на аутентификацию: {'telegram_id': '123456', 'username': 'test_user'}
+ERROR 2025-03-13 09:17:50,551 views 80361 6201372672 Ошибка при аутентификации пользователя: UNIQUE constraint failed: users.username
+ERROR 2025-03-13 09:17:50,552 log 80361 6201372672 Internal Server Error: /api/users/auth/telegram/
+INFO 2025-03-13 09:18:04,229 autoreload 80361 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/users/models.py changed, reloading.
+INFO 2025-03-13 09:18:04,513 autoreload 80501 8346241088 Watching for file changes with StatReloader
+INFO 2025-03-13 09:18:11,751 autoreload 80501 8346241088 /Users/erkebulanmyrzabek/Desktop/timaloh/backend/users/models.py changed, reloading.
+INFO 2025-03-13 09:18:12,044 autoreload 80542 8346241088 Watching for file changes with StatReloader

@@ -93,7 +93,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # Только для разработки!
+CORS_ALLOW_ALL_ORIGINS = False  # Отключаем, так как используем конкретные origins
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",    # Vite dev server
@@ -101,7 +101,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://testprojectvuetgminiapp.web.app",
 ]
 
-CORS_ALLOWED_METHODS = [
+CORS_ALLOW_METHODS = [
     'GET',
     'POST',
     'PUT',
@@ -110,7 +110,7 @@ CORS_ALLOWED_METHODS = [
     'OPTIONS'
 ]
 
-CORS_ALLOWED_HEADERS = [
+CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
     'authorization',
@@ -121,6 +121,8 @@ CORS_ALLOWED_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
+CORS_EXPOSE_HEADERS = ['content-type', 'authorization']
 
 # Logging configuration
 LOGGING = {

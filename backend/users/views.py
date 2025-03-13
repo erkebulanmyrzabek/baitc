@@ -112,25 +112,48 @@ class UserProfileView(APIView):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def telegram_auth(request):
+    logger.info(f"Получен запрос на аутентификацию: {request.data}")
+    
     telegram_id = request.data.get('telegram_id')
     if not telegram_id:
+        logger.error("telegram_id отсутствует в запросе")
         return Response({'error': 'telegram_id is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-    user, created = UserProfile.objects.get_or_create(
-        telegram_id=telegram_id,
-        defaults={
-            'username': request.data.get('username', ''),
-            'first_name': request.data.get('first_name', ''),
-            'last_name': request.data.get('last_name', ''),
-            'photo_url': request.data.get('photo_url'),
-        }
-    )
+    try:
+        user, created = UserProfile.objects.get_or_create(
+            telegram_id=telegram_id,
+            defaults={
+                'username': request.data.get('username', f'user_{telegram_id}'),
+                'first_name': request.data.get('first_name', ''),
+                'last_name': request.data.get('last_name', ''),
+                'photo_url': request.data.get('photo_url'),
+            }
+        )
 
-    serializer = UserProfileSerializer(user)
-    return Response({
-        'user': serializer.data,
-        'is_new': created
-    })
+        # Обновляем существующего пользователя
+        if not created and any(field in request.data for field in ['username', 'first_name', 'last_name', 'photo_url']):
+            user.username = request.data.get('username', user.username)
+            user.first_name = request.data.get('first_name', user.first_name)
+            user.last_name = request.data.get('last_name', user.last_name)
+            user.photo_url = request.data.get('photo_url', user.photo_url)
+            user.save()
+
+        logger.info(f"Пользователь {'создан' if created else 'обновлен'}: {user.telegram_id}")
+        
+        serializer = UserProfileSerializer(user)
+        response_data = {
+            'user': serializer.data,
+            'is_new': created
+        }
+        
+        return Response(response_data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        
+    except Exception as e:
+        logger.error(f"Ошибка при аутентификации пользователя: {str(e)}")
+        return Response(
+            {'error': f'Ошибка при аутентификации: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 @api_view(['GET', 'PUT'])
 @permission_classes([AllowAny])

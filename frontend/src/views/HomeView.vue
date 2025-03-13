@@ -54,16 +54,17 @@ const authenticateWithTelegram = async () => {
         }
 
         console.log('Telegram user data:', MiniApp.initDataUnsafe.user)
-        console.log('API URL:', 'https://hack.1ge.kz')
+        console.log('API URL:', API_URL)
         console.log('Отправляем данные на сервер:', userData)
 
-        const response = await fetch('https://hack.1ge.kz/api/users/auth/telegram/', {
+        const response = await fetch(`${API_URL}/api/users/auth/telegram/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Origin': 'https://hack.1ge.kz'
+                'Origin': window.location.origin
             },
+            credentials: 'include',
             body: JSON.stringify(userData)
         })
 
@@ -71,28 +72,36 @@ const authenticateWithTelegram = async () => {
         console.log('Response headers:', Object.fromEntries(response.headers))
 
         if (!response.ok) {
-            const errorText = await response.text()
-            console.error('Error response:', errorText)
-            throw new Error(`Ошибка аутентификации: ${response.status}. ${errorText}`)
+            let errorMessage = 'Ошибка аутентификации'
+            try {
+                const errorData = await response.json()
+                errorMessage = errorData.error || errorMessage
+            } catch (e) {
+                console.error('Ошибка при парсинге ответа:', e)
+            }
+            throw new Error(`${errorMessage} (${response.status})`)
         }
 
         const data = await response.json()
         console.log('Ответ сервера:', data)
         
-        // Сохраняем данные пользователя
-        localStorage.setItem('user', JSON.stringify(data.user))
-        
-        // Если пользователь новый, получаем его профиль
-        if (data.is_new) {
-            try {
-                const profile = await fetchUserProfile(userData.telegram_id)
-                console.log('Получен профиль нового пользователя:', profile)
-            } catch (error) {
-                console.error('Ошибка при получении профиля:', error)
+        if (data.user) {
+            localStorage.setItem('user', JSON.stringify(data.user))
+            
+            // Если пользователь новый, получаем его профиль
+            if (data.is_new) {
+                try {
+                    const profile = await fetchUserProfile(userData.telegram_id)
+                    console.log('Получен профиль нового пользователя:', profile)
+                } catch (error) {
+                    console.error('Ошибка при получении профиля:', error)
+                }
             }
+            
+            return data
+        } else {
+            throw new Error('Неверный формат ответа от сервера')
         }
-        
-        return data
     } catch (error) {
         console.error('Ошибка при аутентификации:', error)
         throw error

@@ -3,5 +3,5 @@ from . import views
 
 urlpatterns = [
     path('auth/telegram/', views.telegram_auth, name='telegram-auth'),
-    path('users/profile/', views.user_profile, name='user-profile'),
+    path('profile/', views.user_profile, name='user-profile'),
 ] 

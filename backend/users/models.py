@@ -4,7 +4,7 @@ from django.conf import settings
 
 class UserProfile(models.Model):
     telegram_id = models.CharField(max_length=255, unique=True)
-    username = models.CharField(max_length=150, unique=True)
+    username = models.CharField(max_length=150, blank=True, null=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     photo_url = models.URLField(max_length=500, blank=True, null=True)
