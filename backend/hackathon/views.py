@@ -13,6 +13,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 logger = logging.getLogger(__name__)
 
+def changes(request):
+    return render(request, 'changes.html')
 
 
 class HackathonViewSet(viewsets.ModelViewSet):
