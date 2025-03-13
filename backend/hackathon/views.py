@@ -14,7 +14,6 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 logger = logging.getLogger(__name__)
 
 
-# Create your views here.
 
 class HackathonViewSet(viewsets.ModelViewSet):
     serializer_class = HackathonSerializer
