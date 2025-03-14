@@ -1,27 +1,37 @@
 from rest_framework import serializers
 from django.utils import timezone
-from .models import Hackathon, Tag
+from .models import Hackathon, Tag, HackathonTime, HackathonImages
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ['id', 'name']
 
+class HackathonTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HackathonTime
+        fields = ['start_date', 'end_date', 'registration_deadline']
+
+class HackathonImagesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HackathonImages
+        fields = ['preview_image', 'banner_image', 'cover_image', 'thumbnail_image']
+
 class HackathonSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
+    time_info = HackathonTimeSerializer(read_only=True)
+    images = HackathonImagesSerializer(read_only=True)
     participants_count = serializers.SerializerMethodField()
     is_registered = serializers.SerializerMethodField()
     can_register = serializers.SerializerMethodField()
-    image = serializers.URLField(allow_blank=True, required=False)
-
+    
     class Meta:
         model = Hackathon
         fields = [
-            'id', 'name', 'full_description', 'short_description', 'image',
-            'start_date', 'end_date', 'registration_deadline', 'max_participants',
-            'prize_pool', 'location', 'is_online', 'tags', 'requirements',
-            'participants_count', 'is_registered', 'can_register',
-            'created_at', 'updated_at'
+            'id', 'name', 'full_description', 'short_description',
+            'type', 'status', 'registration_limit', 'prize_pool',
+            'location', 'tags', 'participants_count', 'is_registered',
+            'can_register', 'time_info', 'images', 'created_at', 'updated_at'
         ]
         read_only_fields = ['participants_count', 'is_registered', 'can_register', 'created_at', 'updated_at']
 
@@ -43,9 +53,11 @@ class HackathonSerializer(serializers.ModelSerializer):
     def get_can_register(self, obj):
         try:
             now = timezone.now()
-            if obj.registration_deadline < now:
+            if not hasattr(obj, 'time_info') or not obj.time_info:
                 return False
-            if obj.participants.count() >= obj.max_participants:
+            if obj.time_info.registration_deadline < now:
+                return False
+            if obj.registration_limit and obj.participants.count() >= obj.registration_limit:
                 return False
             request = self.context.get('request')
             if request and hasattr(request, 'user') and request.user.is_authenticated:
@@ -55,22 +67,21 @@ class HackathonSerializer(serializers.ModelSerializer):
             return False
 
     def validate(self, data):
-        if 'start_date' in data and 'end_date' in data:
-            if data['start_date'] >= data['end_date']:
+        if 'time_info' in data:
+            time_info = data['time_info']
+            if time_info['start_date'] >= time_info['end_date']:
                 raise serializers.ValidationError({
-                    "end_date": "Дата окончания должна быть позже даты начала"
+                    "time_info": {"end_date": "Дата окончания должна быть позже даты начала"}
                 })
 
-        if 'registration_deadline' in data and 'start_date' in data:
-            if data['registration_deadline'] >= data['start_date']:
+            if time_info['registration_deadline'] >= time_info['start_date']:
                 raise serializers.ValidationError({
-                    "registration_deadline": "Дедлайн регистрации должен быть раньше даты начала"
+                    "time_info": {"registration_deadline": "Дедлайн регистрации должен быть раньше даты начала"}
                 })
 
-        if 'max_participants' in data and data['max_participants'] < 1:
+        if 'registration_limit' in data and data['registration_limit'] is not None and data['registration_limit'] < 1:
             raise serializers.ValidationError({
-                "max_participants": "Максимальное количество участников должно быть больше 0"
+                "registration_limit": "Лимит участников должен быть больше 0"
             })
-
 
         return data
